@@ -1,0 +1,17 @@
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+
+const Footer = () => {
+  return (
+    <View style={styles.footer}>
+      <Text style={styles.text}>© 2026 Bijon App</Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  footer: { padding: 10, backgroundColor: '#e5e7eb' },
+  text: { textAlign: 'center' },
+});
+
+export default Footer;
