@@ -7,15 +7,31 @@ buildscript {
         ndkVersion = "27.1.12297006"
         kotlinVersion = "2.1.20"
     }
+
     repositories {
         google()
         mavenCentral()
     }
+
     dependencies {
-        classpath("com.android.tools.build:gradle")
+        classpath("com.android.tools.build:gradle:8.2.2")
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20")
     }
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+/* ===== SAFE COMPILE SDK INJECTION ===== */
+subprojects { subproject ->
+    subproject.plugins.whenPluginAdded { plugin ->
+        if (plugin.class.name == 'com.android.build.gradle.AppPlugin' ||
+            plugin.class.name == 'com.android.build.gradle.LibraryPlugin') {
+
+            subproject.android {
+                compileSdkVersion rootProject.ext.compileSdkVersion
+                // DO NOT SET targetSdkVersion for libraries
+            }
+        }
+    }
+}

@@ -6,4 +6,5 @@ export type RootStackParamList = {
   Roster: undefined;
   Leave: undefined;
   Reports: undefined;
+  LockScreen: undefined; 
 };

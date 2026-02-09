@@ -2,27 +2,19 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
-/**
- * This is the configuration block to customize your React Native Android app.
- * By default you don't need to apply any configuration, just uncomment the lines you need.
- */
 react {
     autolinkLibrariesWithApp()
 }
 
-/**
- * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
- */
 def enableProguardInReleaseBuilds = false
-
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 android {
-    ndkVersion rootProject.ext.ndkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-    compileSdk rootProject.ext.compileSdkVersion
-
     namespace "com.INSAF"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    ndkVersion rootProject.ext.ndkVersion
+
     defaultConfig {
         applicationId "com.INSAF"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -30,6 +22,7 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -38,20 +31,19 @@ android {
             keyPassword 'android'
         }
     }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
 
-     splits {
+    splits {
         abi {
             reset()
             enable true
@@ -62,12 +54,25 @@ android {
 }
 
 dependencies {
-    // The version of react-native is set by the React Native Gradle Plugin
+    // React Native core
     implementation("com.facebook.react:react-android")
 
+    // Hermes or JSC
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor
+    }
+}
+
+// ================= SAFE COMPILE SDK INJECTION FOR LIBRARIES =================
+subprojects { subproject ->
+    subproject.plugins.whenPluginAdded { plugin ->
+        if (plugin.class.name == 'com.android.build.gradle.AppPlugin' ||
+            plugin.class.name == 'com.android.build.gradle.LibraryPlugin') {
+            
+            // Only set compileSdkVersion for library projects
+            subproject.android.compileSdkVersion = rootProject.ext.compileSdkVersion
+        }
     }
 }

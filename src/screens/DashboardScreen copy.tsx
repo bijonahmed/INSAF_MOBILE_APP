@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
-import { Text, Card, IconButton } from 'react-native-paper';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { Text, Card } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
 import { RootStackParamList } from '../navigation/types';
-import PatternLockScreen from './hrm/LockScreen';
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -14,17 +12,19 @@ type NavigationProp = NativeStackNavigationProp<
 
 const DashboardScreen = (): React.ReactElement => {
   const navigation = useNavigation<NavigationProp>();
-
   const [time, setTime] = useState(new Date());
-  const [authenticated, setAuthenticated] = useState(false);
 
-  /* ================= CLOCK ================= */
+ 
   useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
+    const timer = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
     return () => clearInterval(timer);
   }, []);
 
   const formatTime = (date: Date) => date.toLocaleTimeString('en-GB');
+
   const formatDate = (date: Date) =>
     date.toLocaleDateString('en-GB', {
       weekday: 'long',
@@ -33,9 +33,6 @@ const DashboardScreen = (): React.ReactElement => {
       year: 'numeric',
     });
 
-  /* ================= FINGERPRINT AUTH ================= */
-
-  /* ================= DASHBOARD UI ================= */
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -82,17 +79,8 @@ const DashboardScreen = (): React.ReactElement => {
             <Text style={styles.cardTitle}>Reports</Text>
             <Text style={styles.cardSub}>Analytics & data</Text>
           </Card>
-          <Card
-            style={[styles.card, styles.PatternLockScreen]}
-            onPress={() => navigation.navigate('LockScreen')}
-          >
-            <Text style={styles.cardTitle}>Screen Lock</Text>
-            <Text style={styles.cardSub}>Security</Text>
-          </Card>
         </View>
       </ScrollView>
-
-      {/* 🔄 Fingerprint retry button */}
     </View>
   );
 };
@@ -104,18 +92,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
-    paddingTop: 60,
-    paddingHorizontal: 16,
+    justifyContent: 'center', // center content
+    alignItems: 'center',
+    paddingTop: 60, // pushes content down from the top
+    paddingHorizontal: 16, // optional horizontal padding
   },
   content: {
+    padding: 1,
     paddingBottom: 40,
   },
+
   subtitle: {
     fontSize: 13,
     color: '#475569',
     marginBottom: 14,
     textAlign: 'center',
   },
+
   clockCard: {
     backgroundColor: '#0f172a',
     borderRadius: 18,
@@ -134,11 +127,13 @@ const styles = StyleSheet.create({
     color: '#e5e7eb',
     marginTop: 4,
   },
+
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
+
   card: {
     width: '48%',
     paddingVertical: 22,
@@ -147,6 +142,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 6,
   },
+
   cardTitle: {
     fontSize: 16,
     fontWeight: '700',
@@ -157,9 +153,9 @@ const styles = StyleSheet.create({
     color: '#e2e8f0',
     marginTop: 2,
   },
+
   employeeCard: { backgroundColor: '#2563eb' },
   rosterCard: { backgroundColor: '#16a34a' },
   leaveCard: { backgroundColor: '#f97316' },
   reportCard: { backgroundColor: '#7c3aed' },
-  PatternLockScreen: { backgroundColor: '#241b33' },
 });

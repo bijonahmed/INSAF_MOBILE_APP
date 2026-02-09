@@ -11,6 +11,7 @@ import EmployeeScreen from '../screens/hrm/EmployeeScreen';
 import RosterScreen from '../screens/hrm/RosterScreen';
 import LeaveScreen from '../screens/hrm/LeaveScreen';
 import ReportsScreen from '../screens/hrm/ReportsScreen';
+import LockScreen from '../screens/hrm/LockScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -34,6 +35,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Roster" component={RosterScreen} />
       <Stack.Screen name="Leave" component={LeaveScreen} />
       <Stack.Screen name="Reports" component={ReportsScreen} />
+      <Stack.Screen name="LockScreen" component={LockScreen} />
     </Stack.Navigator>
   );
 }
