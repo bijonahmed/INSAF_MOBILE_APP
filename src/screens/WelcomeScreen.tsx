@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -11,13 +11,23 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Welcome'>;
+type NavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Welcome'
+>;
 
 export default function WelcomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { width } = Dimensions.get('window');
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  // ✅ Hide Header
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -55,7 +65,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: '#ffffff',
   },
 
   content: {

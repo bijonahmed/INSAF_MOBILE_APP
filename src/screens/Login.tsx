@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useState, useLayoutEffect } from 'react';
+import { View, StyleSheet, Platform } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,6 +17,13 @@ const Login = (): React.ReactElement => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  // ✅ Hide Header for modern look
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+
   const handleLogin = () => {
     if (username === 'demo' && password === 'demo') {
       setError('');
@@ -29,13 +36,14 @@ const Login = (): React.ReactElement => {
   return (
     <View style={styles.screen}>
       <View style={styles.card}>
-        <Text style={styles.title}>Login</Text>
+        <Text style={styles.title}>Welcome Back</Text>
 
         <TextInput
           label="Username"
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
+          mode="outlined"
           style={styles.input}
         />
 
@@ -44,6 +52,7 @@ const Login = (): React.ReactElement => {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          mode="outlined"
           style={styles.input}
         />
 
@@ -53,6 +62,7 @@ const Login = (): React.ReactElement => {
           mode="contained"
           onPress={handleLogin}
           style={styles.button}
+          contentStyle={{ paddingVertical: 6 }}
         >
           Login
         </Button>
@@ -66,7 +76,7 @@ export default Login;
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#ffffff', // ✅ Full white background
+    backgroundColor: '#f8fafc', // soft white modern background
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -76,33 +86,41 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 420,
     backgroundColor: '#ffffff',
-    padding: 24,
-    borderRadius: 12,
-    elevation: 4, // Android shadow
+    padding: 28,
+    borderRadius: 18,
+
+    // ✅ Android Shadow
+    elevation: 8,
+
+    // ✅ iOS Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
 
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
     color: '#0f172a',
   },
 
   input: {
-    marginBottom: 12,
+    marginBottom: 16,
     backgroundColor: '#ffffff',
   },
 
   button: {
-    marginTop: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+    marginTop: 8,
+    borderRadius: 10,
   },
 
   error: {
     color: '#dc2626',
-    marginBottom: 10,
+    marginBottom: 12,
     textAlign: 'center',
+    fontSize: 13,
   },
 });

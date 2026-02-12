@@ -4,6 +4,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
 import AppNavigator from './src/navigation/AppNavigator';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 enableScreens(); // important
 
@@ -11,13 +12,13 @@ export default function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
-    <PaperProvider>
-      {/* Full-screen status bar */}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PaperProvider>
         <StatusBar hidden={true} />
-
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
-    </PaperProvider>
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </PaperProvider>
+    </GestureHandlerRootView>
   );
 }

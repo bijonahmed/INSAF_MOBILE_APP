@@ -1,7 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
-
+import { TopBar } from '../components/Header';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/Login'; // ✅ FIXED
 
@@ -12,14 +12,15 @@ import RosterScreen from '../screens/hrm/RosterScreen';
 import LeaveScreen from '../screens/hrm/LeaveScreen';
 import ReportsScreen from '../screens/hrm/ReportsScreen';
 import LockScreen from '../screens/hrm/LockScreen';
-
+ import MyProfileScreen from '../screens/MyProfileScreen'; // add if you have
+ 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   return (
     <Stack.Navigator
       initialRouteName="Welcome"
-      screenOptions={{ headerShown: false }}
+      screenOptions={{ headerShown: true }}
     >
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
@@ -27,7 +28,7 @@ export default function AppNavigator() {
       <Stack.Screen
         name="Dashboard"
         component={DashboardScreen}
-        options={{ headerBackVisible: false }} // ✅ modern way
+        options={{ headerBackVisible: false }} 
       />
 
       {/* HRM Screens */}
