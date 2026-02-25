@@ -36,7 +36,7 @@ const Login = (): React.ReactElement => {
   return (
     <View style={styles.screen}>
       <View style={styles.card}>
-        <Text style={styles.title}>Welcome Back</Text>
+        <Text style={styles.title}>Welcome Back..</Text>
 
         <TextInput
           label="Username"
