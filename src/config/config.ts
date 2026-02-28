@@ -1,0 +1,1 @@
+export const API_URL = 'http://45.251.56.104:5001/api';

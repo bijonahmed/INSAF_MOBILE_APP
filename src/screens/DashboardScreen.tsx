@@ -7,7 +7,6 @@ import {
   Platform,
   TouchableOpacity,
   BackHandler,
-  TextInput,
   FlatList,
   Modal,
 } from 'react-native';
@@ -26,9 +25,9 @@ type NavigationProp = NativeStackNavigationProp<
 const DashboardScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [time, setTime] = useState(new Date());
-  const [search, setSearch] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [username, setUsername] = useState<string>(''); // ✅ username from AsyncStorage
 
   const notifications = [
     { id: '1', title: 'New Employee Added' },
@@ -58,7 +57,23 @@ const DashboardScreen = () => {
     return 'Good Evening';
   };
 
-  /* ================= EXIT ================= */
+  /* ================= LOAD USER ================= */
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const userStr = await AsyncStorage.getItem('user_info');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          setUsername(user.username || user.firstName || '');
+        }
+      } catch (err) {
+        console.warn('Failed to load user info:', err);
+      }
+    };
+    loadUser();
+  }, []);
+
+  /* ================= EXIT / LOGOUT ================= */
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'No', style: 'cancel' },
@@ -66,23 +81,20 @@ const DashboardScreen = () => {
         text: 'Yes',
         style: 'destructive',
         onPress: async () => {
-          // 1️⃣ Clear stored data (tokens, user info, etc.)
           await AsyncStorage.clear();
-
-          // 2️⃣ Exit app completely on Android
           if (Platform.OS === 'android') {
             BackHandler.exitApp();
           } else {
-            // 3️⃣ Reset navigation for iOS (cannot fully exit)
             navigation.reset({
               index: 0,
-              routes: [{ name: 'Welcome' }], // your login screen
+              routes: [{ name: 'Login' }], // your login screen
             });
           }
         },
       },
     ]);
   };
+
   /* ================= ICONS ================= */
   const LogoutIcon = ({ size = 24, color = 'red' }) => (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -138,10 +150,11 @@ const DashboardScreen = () => {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* TOP BAR */}
       <View style={styles.topBar}>
-        <Text style={[styles.title, { color: colors.text }]}>Bijon</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          Welcome, {username || 'User'}!
+        </Text>
 
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          {/* Notification */}
           <TouchableOpacity
             onPress={() => setShowNotifications(true)}
             style={{ marginRight: 16 }}
@@ -149,7 +162,6 @@ const DashboardScreen = () => {
             <NotificationIcon color={darkMode ? '#f1f5f9' : '#0f172a'} />
           </TouchableOpacity>
 
-          {/* Logout */}
           <TouchableOpacity onPress={handleLogout}>
             <LogoutIcon color="red" />
           </TouchableOpacity>
@@ -186,8 +198,6 @@ const DashboardScreen = () => {
           <Text style={styles.clockDate}>{formatDate(time)}</Text>
           <Text style={styles.clockDate}>{getGreeting()}</Text>
         </View>
-
-       
 
         {/* CARDS */}
         <View style={styles.grid}>
@@ -259,13 +269,6 @@ const styles = StyleSheet.create({
   },
   clockTime: { fontSize: 34, fontWeight: '700', color: '#38bdf8' },
   clockDate: { fontSize: 13, color: '#e5e7eb', marginTop: 4 },
-  searchInput: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-    fontSize: 14,
-  },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -280,10 +283,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563eb',
   },
   cardTitle: { fontSize: 16, fontWeight: '700', color: '#fff' },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-  },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalContent: {
     position: 'absolute',
     top: 70,
