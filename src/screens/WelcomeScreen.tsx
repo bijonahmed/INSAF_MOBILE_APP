@@ -25,6 +25,19 @@ export default function WelcomeScreen() {
     navigation.setOptions({ headerShown: false });
   }, [navigation]);
 
+
+//   import { API_ENDPOINTS } from "../config/apiRoutes";
+// import { get } from "../config/apiHelper";
+
+// const fetchEmployees = async (token: string) => {
+//   try {
+//     const response = await get(API_ENDPOINTS.EMPLOYMENT.GET_EMPLOYEE_LIST, token);
+//     console.log(response.data);
+//   } catch (err) {
+//     console.error(err);
+//   }
+// };
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
