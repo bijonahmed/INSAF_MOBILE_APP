@@ -1,91 +1,122 @@
-import React from 'react';
-import { View, StyleSheet, Image, ScrollView, TextInput } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Image, ScrollView, TextInput, Alert } from 'react-native';
 import { Text, Card, Button } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import profile_pic from '../../assets/img/profile_pic.png'; // local profile picture
 
-interface MyProfileScreenProps {
-  darkMode?: boolean; // optional, you can pass darkMode from Drawer
+interface UserInfo {
+  id: number;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  rolename: string;
+  lastLoginAt: string;
 }
 
-const MyProfileScreen = ({ darkMode = false }: MyProfileScreenProps) => {
-  const [alertMessage, setAlertMessage] = React.useState<string | null>(null);
+const MyProfileScreen = () => {
+  const [user, setUser] = useState<UserInfo | null>(null);
 
-  const alert = (message: string) => {
-    setAlertMessage(message);
-    setTimeout(() => setAlertMessage(null), 2000);
+  // Load user info from AsyncStorage
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const userStr = await AsyncStorage.getItem('user_info');
+        if (userStr) {
+          const parsedUser = JSON.parse(userStr);
+          setUser(parsedUser);
+          console.log('User Info:', parsedUser); // log user info on load
+        }
+      } catch (err) {
+        console.warn('Failed to load user info:', err);
+      }
+    };
+    loadUser();
+  }, []);
+
+  if (!user) return null;
+
+  // Handle form submission with validation
+  const handleSubmit = async () => {
+    if (!user.username.trim()) {
+      Alert.alert('Validation Error', 'Username is required');
+      return;
+    }
+    if (!user.firstName.trim()) {
+      Alert.alert('Validation Error', 'First Name is required');
+      return;
+    }
+    if (!user.lastName.trim()) {
+      Alert.alert('Validation Error', 'Last Name is required');
+      return;
+    }
+
+    // Save updated user to AsyncStorage
+    try {
+      await AsyncStorage.setItem('user_info', JSON.stringify(user));
+      Alert.alert('Success', 'Profile updated successfully!');
+    } catch (err) {
+      console.warn('Failed to save user info:', err);
+      Alert.alert('Error', 'Failed to update profile');
+    }
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={[
-        styles.container,
-        { backgroundColor: darkMode ? '#111827' : '#f8fafc' },
-      ]}
-    >
-      {/* Profile Card */}
-      <Card
-        style={[
-          styles.card,
-          {
-            backgroundColor: darkMode ? '#1f2937' : '#fff',
-            shadowColor: darkMode ? '#000' : '#000',
-          },
-        ]}
-      >
+    <ScrollView contentContainerStyle={styles.container}>
+      <Card style={styles.card}>
+        {/* Profile Header */}
         <View style={styles.profileHeader}>
-          <Image
-            source={{ uri: 'https://bijonprofile.com/assets/img/developer_bijon.jpg' }} // replace with real image or avatar
-            style={styles.avatar}
-          />
+          <Image source={profile_pic} style={styles.avatar} />
           <View style={styles.profileInfo}>
-            <Text style={[styles.name, { color: darkMode ? '#f1f5f9' : '#0f172a' }]}>
-              Md. Bijon Ahmed
-            </Text>
-            <Text style={[styles.position, { color: darkMode ? '#d1d5db' : '#64748b' }]}>
-              Software Engineer
-            </Text>
-            <Text style={[styles.email, { color: darkMode ? '#d1d5db' : '#64748b' }]}>
-              bijon@example.com
-            </Text>
+            <Text style={styles.name}>{user.username}</Text>
+            <Text style={styles.position}>{user.rolename}</Text>
+            <Text style={styles.email}>{user.email || 'N/A'}</Text>
           </View>
         </View>
 
         {/* Editable Info */}
         <View style={styles.infoSection}>
           <TextInput
-            placeholder="Full Name"
-            defaultValue="Md. Bijon Ahmed"
-            style={[
-              styles.input,
-              { backgroundColor: darkMode ? '#374151' : '#f1f5f9', color: darkMode ? '#f1f5f9' : '#0f172a' },
-            ]}
-            placeholderTextColor={darkMode ? '#9ca3af' : '#9ca3af'}
+            placeholder="Username"
+            value={user.username}
+            onChangeText={(text) => setUser({ ...user, username: text })}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="First Name"
+            value={user.firstName}
+            onChangeText={(text) => setUser({ ...user, firstName: text })}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Last Name"
+            value={user.lastName}
+            onChangeText={(text) => setUser({ ...user, lastName: text })}
+            style={styles.input}
           />
           <TextInput
             placeholder="Email"
-            defaultValue="bijon@example.com"
-            style={[
-              styles.input,
-              { backgroundColor: darkMode ? '#374151' : '#f1f5f9', color: darkMode ? '#f1f5f9' : '#0f172a' },
-            ]}
-            placeholderTextColor={darkMode ? '#9ca3af' : '#9ca3af'}
+            value={user.email || ''}
+            onChangeText={(text) => setUser({ ...user, email: text })}
+            style={styles.input}
           />
+
+
           <TextInput
-            placeholder="Position"
-            defaultValue="Software Engineer"
-            style={[
-              styles.input,
-              { backgroundColor: darkMode ? '#374151' : '#f1f5f9', color: darkMode ? '#f1f5f9' : '#0f172a' },
-            ]}
-            placeholderTextColor={darkMode ? '#9ca3af' : '#9ca3af'}
+            placeholder="Role"
+            value={user.rolename}
+            style={[styles.input, { backgroundColor: '#e5e7eb' }]}
+            editable={false}
           />
+
         </View>
 
         <Button
           mode="contained"
-          onPress={() => alert('Profile updated!')}
-          style={[styles.button, { backgroundColor: '#2563eb' }]}
+          onPress={handleSubmit}
+          style={styles.button}
         >
-          Update Profile
+          Submit
         </Button>
       </Card>
     </ScrollView>
@@ -99,32 +130,40 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 16,
     paddingBottom: 40,
+    backgroundColor: '#f8fafc',
   },
   card: {
     borderRadius: 16,
-    padding: 20,
-    elevation: 6,
+    padding: 24,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
   },
   profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
-  avatar: { width: 80, height: 80, borderRadius: 40, marginRight: 16 },
+  avatar: { width: 90, height: 90, borderRadius: 45, marginRight: 16 },
   profileInfo: {},
-  name: { fontSize: 20, fontWeight: '700' },
-  position: { fontSize: 14, marginTop: 2 },
-  email: { fontSize: 12, marginTop: 2 },
-  infoSection: { marginBottom: 20 },
+  name: { fontSize: 22, fontWeight: '700', marginBottom: 2 },
+  position: { fontSize: 14, color: '#6b7280', marginBottom: 2 },
+  email: { fontSize: 12, color: '#9ca3af' },
+  infoSection: { marginBottom: 24 },
   input: {
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: 14,
     fontSize: 14,
+    backgroundColor: '#f1f5f9',
   },
   button: {
-    paddingVertical: 10,
-    borderRadius: 12,
+    elevation: 3,
+    backgroundColor: '#de2628',
+    borderRadius: 10,
+    paddingVertical: 6,
   },
 });

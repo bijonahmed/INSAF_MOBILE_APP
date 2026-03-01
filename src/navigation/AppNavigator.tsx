@@ -37,6 +37,8 @@ export default function AppNavigator() {
       <Stack.Screen name="Leave" component={LeaveScreen} />
       <Stack.Screen name="Reports" component={ReportsScreen} />
       <Stack.Screen name="LockScreen" component={LockScreen} />
+      <Stack.Screen name="MyProfile" component={MyProfileScreen} />
+
     </Stack.Navigator>
   );
 }

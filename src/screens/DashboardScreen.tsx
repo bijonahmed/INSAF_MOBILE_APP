@@ -12,22 +12,67 @@ import {
 } from 'react-native';
 import { Text, Card } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import Svg, { Path, Circle } from 'react-native-svg';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Svg, { Path, Circle } from 'react-native-svg';
 
-type NavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Dashboard'
->;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Dashboard'>;
 
+// ================= SVG ICONS (define OUTSIDE parent) =================
+const LogoutIcon = ({ size = 24, color = 'red' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M16 17L21 12L16 7"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M21 12H9"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M12 21H5C4.44772 21 4 20.5523 4 20V4C4 3.44772 4.44772 3 5 3H12"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+const NotificationIcon = ({ size = 24, color = '#0f172a' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M18 8C18 5.23858 15.7614 3 13 3C10.2386 3 8 5.23858 8 8V10C8 11.1046 7.10457 12 6 12H18C16.8954 12 16 11.1046 16 10V8Z"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M6 12V14C6 16.2091 7.79086 18 10 18H14C16.2091 18 18 16.2091 18 14V12"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Circle cx="18" cy="6" r="3" fill="red" />
+  </Svg>
+);
+
+// ================= MAIN COMPONENT =================
 const DashboardScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [time, setTime] = useState(new Date());
   const [darkMode, setDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [username, setUsername] = useState<string>(''); // ✅ username from AsyncStorage
+  const [username, setUsername] = useState<string>('');
 
   const notifications = [
     { id: '1', title: 'New Employee Added' },
@@ -35,7 +80,7 @@ const DashboardScreen = () => {
     { id: '3', title: 'Report Ready' },
   ];
 
-  /* ================= CLOCK ================= */
+  // ================= CLOCK =================
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -57,7 +102,7 @@ const DashboardScreen = () => {
     return 'Good Evening';
   };
 
-  /* ================= LOAD USER ================= */
+  // ================= LOAD USER =================
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -73,7 +118,7 @@ const DashboardScreen = () => {
     loadUser();
   }, []);
 
-  /* ================= EXIT / LOGOUT ================= */
+  // ================= LOGOUT =================
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'No', style: 'cancel' },
@@ -81,66 +126,23 @@ const DashboardScreen = () => {
         text: 'Yes',
         style: 'destructive',
         onPress: async () => {
-          await AsyncStorage.clear();
-          if (Platform.OS === 'android') {
-            BackHandler.exitApp();
-          } else {
+          try {
+            // Clear only login-related data
+            await AsyncStorage.removeItem('access_token');
+            await AsyncStorage.removeItem('user_info');
+
+            // Reset navigation to Login screen
             navigation.reset({
               index: 0,
-              routes: [{ name: 'Login' }], // your login screen
+              routes: [{ name: 'Login' }],
             });
+          } catch (err) {
+            console.warn('Logout failed:', err);
           }
         },
       },
     ]);
   };
-
-  /* ================= ICONS ================= */
-  const LogoutIcon = ({ size = 24, color = 'red' }) => (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M16 17L21 12L16 7"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path
-        d="M21 12H9"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path
-        d="M12 21H5C4.44772 21 4 20.5523 4 20V4C4 3.44772 4.44772 3 5 3H12"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-
-  const NotificationIcon = ({ size = 24, color = '#0f172a' }) => (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M18 8C18 5.23858 15.7614 3 13 3C10.2386 3 8 5.23858 8 8V10C8 11.1046 7.10457 12 6 12H18C16.8954 12 16 11.1046 16 10V8Z"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path
-        d="M6 12V14C6 16.2091 7.79086 18 10 18H14C16.2091 18 18 16.2091 18 14V12"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Circle cx="18" cy="6" r="3" fill="red" />
-    </Svg>
-  );
 
   const colors = darkMode
     ? { background: '#1f2937', text: '#f1f5f9', searchBg: '#4b5563' }
@@ -182,9 +184,7 @@ const DashboardScreen = () => {
             data={notifications}
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
-              <Text style={{ paddingVertical: 8, fontSize: 14 }}>
-                {item.title}
-              </Text>
+              <Text style={{ paddingVertical: 8, fontSize: 14 }}>{item.title}</Text>
             )}
           />
         </View>
@@ -238,9 +238,9 @@ const DashboardScreen = () => {
 
           <Card
             style={[styles.card, { backgroundColor: '#241b33' }]}
-            onPress={() => navigation.navigate('Welcome')}
+            onPress={() => navigation.navigate('MyProfile')}
           >
-            <Text style={styles.cardTitle}>Test</Text>
+            <Text style={styles.cardTitle}>My Profile</Text>
           </Card>
         </View>
       </ScrollView>

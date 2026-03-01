@@ -1,47 +1,56 @@
 import React, { useState, useLayoutEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Image,
+  Modal,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { TextInput, Button, Text, ActivityIndicator } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../navigation/types';
-//import { API_URL } from '../config/config'; // adjust path
 import { post } from '../config/apiHelper';
+import LogoImage from '../../assets/img/logo.jpg'; // local logo
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
-
-//const API_URL_LOGIN = `${post}/v2/SecUsers/Login`;
 
 const Login = (): React.ReactElement => {
   const navigation = useNavigation<NavigationProp>();
 
   const [username, setUsername] = useState('');
   const [userpassword, setUserpassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Modern Alert State
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
   useLayoutEffect(() => {
     navigation.setOptions({ headerShown: false });
   }, [navigation]);
 
-  const handleLogin = async () => {
-    setError('');
+  const showAlert = (message: string) => {
+    setAlertMessage(message);
+    setAlertVisible(true);
+  };
 
+  const handleLogin = async () => {
     if (!username.trim() || !userpassword.trim()) {
-      setError('Username and Password are required');
+      showAlert('Username and Password are required');
       return;
     }
 
     try {
       setLoading(true);
 
-      // ✅ Use safe post helper
       const data = await post('v2/SecUsers/Login', {
         username: username.trim(),
         userpassword: userpassword.trim(),
       });
-
-      console.log('LOGIN RESPONSE:', data);
 
       if (data?.data?.token) {
         await AsyncStorage.setItem('access_token', data.data.token);
@@ -57,48 +66,83 @@ const Login = (): React.ReactElement => {
         return;
       }
 
-      setError(data?.message || 'Invalid username or password');
+      showAlert(data?.message || 'Invalid username or password');
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      showAlert(err.message || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={styles.screen}>
-      <View style={styles.card}>
-        <Text style={styles.title}>Welcome Back</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: '#ffffff' }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.screen}>
+        <View style={styles.card}>
+          <Image
+            source={LogoImage}
+            style={styles.logo}
+            resizeMode="contain"
+          />
 
-        <TextInput
-          label="Username"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          mode="outlined"
-          style={styles.input}
-        />
+          <TextInput
+            label="Username"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+            mode="outlined"
+            style={styles.input}
+          />
 
-        <TextInput
-          label="Password"
-          value={userpassword}
-          onChangeText={setUserpassword}
-          secureTextEntry
-          mode="outlined"
-          style={styles.input}
-        />
+          <TextInput
+            label="Password"
+            value={userpassword}
+            onChangeText={setUserpassword}
+            secureTextEntry
+            mode="outlined"
+            style={styles.input}
+          />
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+          {loading ? (
+            <ActivityIndicator style={{ marginTop: 10 }} />
+          ) : (
+            <Button
+              mode="contained"
+              buttonColor="rgb(222, 38, 40)"
+              textColor="#ffffff"
+              onPress={handleLogin}
+              style={styles.button}
+            >
+              Login
+            </Button>
+          )}
+        </View>
 
-        {loading ? (
-          <ActivityIndicator style={{ marginTop: 10 }} />
-        ) : (
-          <Button mode="contained" onPress={handleLogin} style={styles.button}>
-            Login
-          </Button>
-        )}
+        {/* Modern Custom Alert Modal */}
+        <Modal
+          transparent
+          visible={alertVisible}
+          animationType="fade"
+          onRequestClose={() => setAlertVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              <Text style={styles.modalTitle}>Login Error</Text>
+              <Text style={styles.modalMessage}>{alertMessage}</Text>
+
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => setAlertVisible(false)}
+              >
+                <Text style={styles.modalButtonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -107,38 +151,79 @@ export default Login;
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#f8fafc',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
+
   card: {
     width: '100%',
     maxWidth: 420,
     backgroundColor: '#ffffff',
     padding: 28,
     borderRadius: 18,
-    elevation: 8,
+    elevation: 0,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 24,
-    color: '#0f172a',
+
+  logo: {
+    width: 270,
+    height: 80,
+    alignSelf: 'center',
+    marginBottom: 25,
   },
+
   input: {
     marginBottom: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#eef2ff',
+    borderRadius: 12,
   },
+
   button: {
-    marginTop: 8,
+    marginTop: 12,
     borderRadius: 10,
+    paddingVertical: 6,
   },
-  error: {
-    color: '#dc2626',
-    marginBottom: 12,
+
+  /* ===== Modern Alert Styles ===== */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  modalBox: {
+    width: '85%',
+    backgroundColor: '#ffffff',
+    padding: 25,
+    borderRadius: 18,
+    alignItems: 'center',
+    elevation: 10,
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: 'rgb(222, 38, 40)',
+    marginBottom: 10,
+  },
+
+  modalMessage: {
+    fontSize: 14,
     textAlign: 'center',
-    fontSize: 13,
+    marginBottom: 20,
+    color: '#444',
+  },
+
+  modalButton: {
+    backgroundColor: 'rgb(222, 38, 40)',
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+  },
+
+  modalButtonText: {
+    color: '#ffffff',
+    fontWeight: '600',
   },
 });
