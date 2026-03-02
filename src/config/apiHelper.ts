@@ -1,43 +1,84 @@
-import { API_URL } from './config';
-//POST request helper
-export const post = async (endpoint: string, body: any, token?: string) => {
-  const headers: any = { 'Content-Type': 'application/json' };
-  // eslint-disable-next-line dot-notation
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-  const response = await fetch(`${API_URL}/${endpoint}`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-  });
+//  Token Helper
+const TOKEN_KEY = 'access_token';
 
-  const text = await response.text();
+export const saveToken = async (token: string) => {
+  await AsyncStorage.setItem(TOKEN_KEY, token);
+};
+
+export const removeToken = async () => {
+  await AsyncStorage.removeItem(TOKEN_KEY);
+};
+
+export const getAuthToken = async (): Promise<string | null> => {
   try {
-    return text ? JSON.parse(text) : {};
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (err) {
-    console.warn('Failed to parse JSON:', text);
-    return {};
+    const token = await AsyncStorage.getItem(TOKEN_KEY);
+    return token;
+  } catch (error) {
+    console.warn('Failed to get token');
+    return null;
   }
 };
 
-// GET request helper
-export const get = async (endpoint: string, token?: string) => {
-  const headers: any = { 'Content-Type': 'application/json' };
-  // eslint-disable-next-line dot-notation
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+//  Check if token exists
+export const hasToken = async (): Promise<boolean> => {
+  const token = await getAuthToken();
+  return !!token; // true if token exists
+};
 
-  const response = await fetch(`${API_URL}/${endpoint}`, {
-    method: 'GET',
+
+// Core Request Function
+const request = async (
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  url: string,
+  body?: any
+) => {
+  const token = await getAuthToken();
+
+  const headers: any = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  //console.log('==============================');
+  //console.log(`${method} REQUEST`);
+  //console.log('URL:', url);
+
+  if (body) console.log('BODY:', body);
+  //console.log('TOKEN:', token ? 'Attached' : 'No Token');
+  //console.log('==============================');
+
+  const response = await fetch(url, {
+    method,
     headers,
+    body: body ? JSON.stringify(body) : undefined,
   });
 
   const text = await response.text();
+
+  let data: any = {};
   try {
-    return text ? JSON.parse(text) : {};
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    data = text ? JSON.parse(text) : {};
   } catch (err) {
     console.warn('Failed to parse JSON:', text);
-    return {};
   }
+
+  //Auto Logout on 401
+  if (response.status === 401) {
+    console.warn('Unauthorized - Logging out...');
+    await removeToken();
+    // Optional: navigate to Login screen
+  }
+
+  return data;
 };
+
+// Public Methods
+export const get = (url: string) => request('GET', url);
+export const post = (url: string, body: any) => request('POST', url, body);
+export const put = (url: string, body: any) => request('PUT', url, body);
+export const del = (url: string) => request('DELETE', url);

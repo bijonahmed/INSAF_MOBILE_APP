@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Key, useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,17 +7,19 @@ import {
   Alert,
   Modal,
   TouchableOpacity,
-  TextInput,
   ScrollView,
+  TextInput,
 } from 'react-native';
-import { Text, Card, Button, Menu, Divider } from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { get } from '../../config/apiHelper';
+import { Text, Card, Button } from 'react-native-paper';
+import { Picker } from '@react-native-picker/picker';
+import { API_ENDPOINTS } from '../../config/apiRoutes';
+import { get, hasToken } from '../../config/apiHelper';
 import Svg, { Path } from 'react-native-svg';
 
 interface Employee {
   employeeid: number;
   employeename: string;
+  departmentid: number | null;
   employeecode: string;
   mobilephone: string;
   departmentname: string;
@@ -29,6 +31,8 @@ interface Employee {
 }
 
 interface Department {
+  name: string | undefined;
+  id: Key | null | undefined;
   departmentid: number;
   departmentname: string;
 }
@@ -42,32 +46,28 @@ const EmployeeScreen = () => {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [filterTextName, setFilterTextName] = useState('');
   const [filterTextCode, setFilterTextCode] = useState('');
-  const [filterDepartment, setFilterDepartment] = useState<Department | null>(null);
+  const [filterDepartmentId, setFilterDepartmentId] = useState<number | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const ITEMS_PER_LOAD = 100;
+
+  const ITEMS_PER_LOAD = 50;
 
   // Load employees and departments
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const token = await AsyncStorage.getItem('access_token');
-        if (!token) {
+        const tokenExists = await hasToken();
+        if (!tokenExists) {
           Alert.alert('Error', 'Token not found. Please login again.');
-          setLoading(false);
           return;
         }
 
-        // Fetch Employees
-        const empRes = await get('v1/Employment/GetEmployeeList', token);
+        const empRes = await get(API_ENDPOINTS.EMPLOYMENT.GET_EMPLOYEE_LIST);
         if (empRes?.data && Array.isArray(empRes.data)) {
           setEmployees(empRes.data);
           setDisplayEmployees(empRes.data.slice(0, ITEMS_PER_LOAD));
-        } else {
-          Alert.alert('Error', 'Failed to fetch employees.');
         }
 
-        // Fetch Departments
-        const deptRes = await get('v1/HrManagement/GetDepartmentList', token);
+        const deptRes = await get(API_ENDPOINTS.DEPARTMENT.GET_LIST);
         if (deptRes?.data && Array.isArray(deptRes.data)) {
           setDepartments(deptRes.data);
         }
@@ -93,14 +93,15 @@ const EmployeeScreen = () => {
   };
 
   const handleFilter = () => {
-    const filtered = employees.filter((e) =>
-      e.employeename.toLowerCase().includes(filterTextName.toLowerCase()) &&
-      e.employeecode.toLowerCase().includes(filterTextCode.toLowerCase()) &&
-      (!filterDepartment || e.departmentname === filterDepartment.departmentname)
-    );
-    setDisplayEmployees(filtered.slice(0, ITEMS_PER_LOAD));
-    setFilterModalVisible(false);
-  };
+  const filtered = employees.filter((e) =>
+    e.employeename.toLowerCase().includes(filterTextName.toLowerCase()) &&
+    e.employeecode.toLowerCase().includes(filterTextCode.toLowerCase()) &&
+    (!filterDepartmentId || e.departmentid === filterDepartmentId)
+  );
+
+  setDisplayEmployees(filtered.slice(0, ITEMS_PER_LOAD));
+  setFilterModalVisible(false);
+};
 
   const renderEmployee = ({ item }: { item: Employee }) => (
     <TouchableOpacity onPress={() => setSelectedEmployee(item)}>
@@ -163,26 +164,16 @@ const EmployeeScreen = () => {
             />
 
             {/* Department Dropdown */}
-            <ScrollView style={{ maxHeight: 150, marginBottom: 16 }}>
-              {departments.map((d) => (
-                <TouchableOpacity
-                  key={d.departmentid} // ✅ should work if unique
-                  onPress={() => setFilterDepartment(d)}
-                  style={{
-                    paddingVertical: 10,
-                    paddingHorizontal: 12,
-                    backgroundColor:
-                      filterDepartment?.departmentid === d.departmentid ? '#de2628' : '#f1f5f9',
-                    marginBottom: 4,
-                    borderRadius: 8,
-                  }}
-                >
-                  <Text style={{ color: filterDepartment?.departmentid === d.departmentid ? '#fff' : '#000' }}>
-                    {d.departmentname}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <Picker
+            selectedValue={filterDepartmentId}
+            onValueChange={(value) => setFilterDepartmentId(value)}
+            style={styles.dropdowStyle}
+          >
+            <Picker.Item label="All Departments" value={null} />
+            {departments.map((d) => (
+              <Picker.Item key={d.id} label={d.name} value={d.id} />
+            ))}
+          </Picker>
 
             <Button mode="contained" onPress={handleFilter} style={styles.applyBtn}>
               Apply
@@ -233,7 +224,7 @@ const EmployeeScreen = () => {
         keyExtractor={(item) => item.employeeid.toString()}
         renderItem={renderEmployee}
         ListFooterComponent={
-          !filterTextName && !filterTextCode && !filterDepartment && displayEmployees.length < employees.length ? (
+          !filterTextName && !filterTextCode && !filterDepartmentId && displayEmployees.length < employees.length ? (
             <Button
               mode="contained"
               onPress={handleLoadMore}
@@ -256,15 +247,7 @@ export default EmployeeScreen;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 16 },
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  employeeCard: {
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 10,
-    backgroundColor: '#f8fafc',
-    borderColor: '#de2628',
-    borderWidth: 1,
-    elevation: 2,
-  },
+  employeeCard: { padding: 16, borderRadius: 12, marginBottom: 10, backgroundColor: '#f8fafc', borderColor: '#de2628', borderWidth: 1, elevation: 2 },
   employeeRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   employeeName: { fontSize: 16, fontWeight: '600', flex: 2 },
   employeeDept: { fontSize: 14, color: '#6b7280', flex: 1, textAlign: 'center' },
@@ -274,15 +257,9 @@ const styles = StyleSheet.create({
   modalContent: { width: '85%', backgroundColor: '#fff', padding: 20, borderRadius: 16, elevation: 8 },
   modalTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
   filterInput: { backgroundColor: '#f1f5f9', borderRadius: 12, paddingHorizontal: 12, marginBottom: 16, height: 44 },
+  dropdowStyle: { backgroundColor: '#f1f5f9', borderRadius: 12, marginBottom: 16 },
   applyBtn: { marginBottom: 8, borderRadius: 12 },
   cancelBtn: { borderRadius: 12 },
-  detailModalContent: {
-    width: '90%',
-    maxHeight: '70%',
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 20,
-    elevation: 10,
-  },
+  detailModalContent: { width: '90%', maxHeight: '70%', backgroundColor: '#fff', padding: 20, borderRadius: 20, elevation: 10 },
   detailText: { fontSize: 16, marginBottom: 8 },
 });

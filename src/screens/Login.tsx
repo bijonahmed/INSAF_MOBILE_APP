@@ -13,7 +13,8 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../navigation/types';
-import { post } from '../config/apiHelper';
+import { API_ENDPOINTS } from "../config/apiRoutes";
+import { post, saveToken } from '../config/apiHelper';
 import LogoImage from '../../assets/img/logo.jpg'; // local logo
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
@@ -47,14 +48,15 @@ const Login = (): React.ReactElement => {
     try {
       setLoading(true);
 
-      const data = await post('v2/SecUsers/Login', {
-        username: username.trim(),
-        userpassword: userpassword.trim(),
-      });
+      const data =
+        await post(API_ENDPOINTS.LOGIN, {
+          username: username.trim(),
+          userpassword: userpassword.trim(),
+        });
 
       if (data?.data?.token) {
-        await AsyncStorage.setItem('access_token', data.data.token);
-
+      
+        await saveToken(data.data.token);
         if (data.data.user) {
           await AsyncStorage.setItem(
             'user_info',
@@ -76,6 +78,7 @@ const Login = (): React.ReactElement => {
 
   return (
     <KeyboardAvoidingView
+      // eslint-disable-next-line react-native/no-inline-styles
       style={{ flex: 1, backgroundColor: '#ffffff' }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
@@ -106,6 +109,7 @@ const Login = (): React.ReactElement => {
           />
 
           {loading ? (
+            // eslint-disable-next-line react-native/no-inline-styles
             <ActivityIndicator style={{ marginTop: 10 }} />
           ) : (
             <Button

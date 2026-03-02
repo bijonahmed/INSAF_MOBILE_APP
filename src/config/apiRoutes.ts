@@ -1,47 +1,59 @@
-// Base URLs
-import { API_URL } from './config';
-export const API_V1 = API_URL;
-export const V2 = "http://45.251.56.104:5001/api/v2";
+// Base URL
+import { API_URL } from "./config";
 
-// Utility to build full URL
-const buildUrl = (base: string, path: string) => `${base}/${path}`;
+// Versioned Base URLs
+const API_v1 = `${API_URL}/v1`;
+const API_v2 = `${API_URL}/v2`;
+
+/**
+ * - Removes trailing slash from base
+ * - Removes leading slash from path
+ * - Prevents double slash (//)
+ */
+const buildUrl = (base: string, path: string): string => {
+  const safeBase = base.replace(/\/+$/, "");
+  const safePath = path.replace(/^\/+/, "");
+  return `${safeBase}/${safePath}`;
+};
+
 
 export const API_ENDPOINTS = {
   // Authentication
-  LOGIN: buildUrl(V2, "SecUsers/Login"),
-
+  LOGIN: buildUrl(API_v2, "SecUsers/Login"),
   // HRM - Role & Menu
   HRM: {
-    GET_MENUS: buildUrl(V2, "SecUsers/LoginMenu"),
-    GET_ROLES: buildUrl(V2, "SecRoles/GetAllRoles"),
-    GET_USERS: buildUrl(V2, "SecUsers/GetUsers"),
-    DELETE_ROLE: buildUrl(V2, "SecRoles/DeleteRole"),
-    SAVE_ROLE: buildUrl(V2, "SecRoles/SaveRole"),
-    GET_ALL_MENUS: buildUrl(V2, "SecMenuRolePermission/AllMenuList"),
-    SIDE_MENUS: buildUrl(V2, "SecMenuRolePermission/SideMenuList"),
+    // GET_MENUS: buildUrl(API_v2, "SecUsers/LoginMenu"),
+    // GET_ROLES: buildUrl(API_v2, "SecRoles/GetAllRoles"),
+    // GET_USERS: buildUrl(API_v2, "SecUsers/GetUsers"),
+    // DELETE_ROLE: buildUrl(API_v2, "SecRoles/DeleteRole"),
+    // SAVE_ROLE: buildUrl(API_v2, "SecRoles/SaveRole"),
+    // GET_ALL_MENUS: buildUrl(API_v2, "SecMenuRolePermission/AllMenuList"),
+    // SIDE_MENUS: buildUrl(API_v2, "SecMenuRolePermission/SideMenuList"),
   },
 
   // Employment / Employee
   EMPLOYMENT: {
-    GET_EMPLOYEE_LIST: buildUrl(API_V1, "Employment/GetEmployeeList"),
-    GET_EMPLOYEE_SEARCH: buildUrl(API_V1, "Employment/GetEmployeeListSearch"),
-    GET_EMPLOYEE_RESIGN_LIST: buildUrl(API_V1, "Employment/GetEmployeeResignList"),
-    GET_EMPLOYEE_DTL: buildUrl(API_V1, "Employment/GetEmployeeDtl"),
-    CREATE_EMPLOYEE: buildUrl(API_V1, "Employment/CreateEmployee"),
-    SAVE_PERSONAL: buildUrl(API_V1, "Employment/SaveEmployeePersonal"),
-    SAVE_JOB: buildUrl(API_V1, "Employment/SaveEmployeeJob"),
-    SAVE_EDUCATION: buildUrl(API_V1, "Employment/SaveEmpEducation"),
-    SAVE_CERTIFICATE: buildUrl(API_V1, "Employment/SaveProfessionCertificate"),
-    SAVE_WORK_EXPERIENCE: buildUrl(API_V1, "Employment/SaveWorkexperience"),
-    CREATE_RESIGN: buildUrl(API_V1, "Employment/CreateResignList"),
-    REINSTATE: buildUrl(API_V1, "Employment/ReinstateList"),
-    SAVE_RESIGN_INFO: buildUrl(API_V1, "Employment/SaveResignInfo"),
-    DELETE_EDUCATION: buildUrl(API_V1, "Employment/DeleteEmpEducation"),
-    DELETE_CERTIFICATE: buildUrl(API_V1, "Employment/DeleteProfessionCertificate"),
-  },
+    GET_EMPLOYEE_LIST: buildUrl(API_v1, "Employment/GetEmployeeList"),
 
+    // GET_EMPLOYEE_SEARCH: buildUrl(API_v1, "Employment/GetEmployeeListSearch"),
+    // GET_EMPLOYEE_RESIGN_LIST: buildUrl(API_v1, "Employment/GetEmployeeResignList"),
+    // GET_EMPLOYEE_DTL: buildUrl(API_v1, "Employment/GetEmployeeDtl"),
+    // CREATE_EMPLOYEE: buildUrl(API_v1, "Employment/CreateEmployee"),
+    // SAVE_PERSONAL: buildUrl(API_v1, "Employment/SaveEmployeePersonal"),
+    // SAVE_JOB: buildUrl(API_v1, "Employment/SaveEmployeeJob"),
+    // SAVE_EDUCATION: buildUrl(API_v1, "Employment/SaveEmpEducation"),
+    // SAVE_CERTIFICATE: buildUrl(API_v1, "Employment/SaveProfessionCertificate"),
+    // SAVE_WORK_EXPERIIENCE: buildUrl(API_v1, "Employment/SaveWorkexperience"),
+    // CREATE_RESIGN: buildUrl(API_v1, "Employment/CreateResignList"),
+    // REINSTATE: buildUrl(API_v1, "Employment/ReinstateList"),
+    // SAVE_RESIGN_INFO: buildUrl(API_v1, "Employment/SaveResignInfo"),
+    // DELETE_EDUCATION: buildUrl(API_v1, "Employment/DeleteEmpEducation"),
+    // DELETE_CERTIFICATE: buildUrl(API_v1, "Employment/DeleteProfessionCertificate"),
+
+  },
   // Department
+
   DEPARTMENT: {
-    GET_LIST: buildUrl(API_V1, "HrManagement/GetDepartmentList"),
+    GET_LIST: buildUrl(API_v1, "HrManagement/GetDepartmentList"),
   },
 };
