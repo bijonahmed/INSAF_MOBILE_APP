@@ -1,18 +1,15 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
-import { TopBar } from '../components/Header';
 import WelcomeScreen from '../screens/WelcomeScreen';
-import LoginScreen from '../screens/Login'; // ✅ FIXED
-
+import LoginScreen from '../screens/Login';
 import DashboardScreen from '../screens/DashboardScreen';
-
 import EmployeeScreen from '../screens/hrm/EmployeeScreen';
 import RosterScreen from '../screens/hrm/RosterScreen';
 import LeaveScreen from '../screens/hrm/LeaveScreen';
 import ReportsScreen from '../screens/hrm/ReportsScreen';
 import LockScreen from '../screens/hrm/LockScreen';
- import MyProfileScreen from '../screens/MyProfileScreen'; // add if you have
+ import MyProfileScreen from '../screens/MyProfileScreen'; 
  
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -20,8 +17,18 @@ export default function AppNavigator() {
   return (
     <Stack.Navigator
       initialRouteName="Welcome"
-      screenOptions={{ headerShown: true }}
+      screenOptions={{
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: '#1f2937', 
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: 'bold', 
+        },
+      }}
     >
+ 
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
 

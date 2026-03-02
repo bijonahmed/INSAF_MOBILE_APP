@@ -22,6 +22,27 @@ export const getAuthToken = async (): Promise<string | null> => {
   }
 };
 
+
+export const getUserInfo = async (): Promise<any | null> => {
+  try {
+    const token = await getAuthToken();
+    if (!token) {
+      console.warn('No valid token found. User is not authenticated.');
+      return null;
+    }
+
+    const userStr = await AsyncStorage.getItem('user_info');
+    if (userStr) {
+      return JSON.parse(userStr);
+    }
+
+    return null;
+  } catch (err) {
+    console.warn('Failed to get user info:', err);
+    return null;
+  }
+};
+
 //  Check if token exists
 export const hasToken = async (): Promise<boolean> => {
   const token = await getAuthToken();

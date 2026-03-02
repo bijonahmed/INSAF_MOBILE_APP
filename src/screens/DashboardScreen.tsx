@@ -4,9 +4,7 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  Platform,
   TouchableOpacity,
-  BackHandler,
   FlatList,
   Modal,
 } from 'react-native';
@@ -16,6 +14,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Path, Circle } from 'react-native-svg';
+import { getUserInfo } from '../config/apiHelper';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Dashboard'>;
 
@@ -70,7 +69,6 @@ const NotificationIcon = ({ size = 24, color = '#0f172a' }) => (
 const DashboardScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [time, setTime] = useState(new Date());
-  const [darkMode, setDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [username, setUsername] = useState<string>('');
 
@@ -103,20 +101,18 @@ const DashboardScreen = () => {
   };
 
   // ================= LOAD USER =================
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const userStr = await AsyncStorage.getItem('user_info');
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          setUsername(user.username || user.firstName || '');
-        }
-      } catch (err) {
-        console.warn('Failed to load user info:', err);
-      }
-    };
-    loadUser();
-  }, []);
+useEffect(() => {
+  const loadUser = async () => {
+    const user = await getUserInfo();
+    if (user) {
+      setUsername(user.username || user.firstName || '');
+    } else {
+      // Optional: navigate to Login if no token/user
+      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+    }
+  };
+  loadUser();
+}, [navigation]);
 
   // ================= LOGOUT =================
   const handleLogout = async () => {
@@ -144,114 +140,92 @@ const DashboardScreen = () => {
     ]);
   };
 
-  const colors = darkMode
-    ? { background: '#1f2937', text: '#f1f5f9', searchBg: '#4b5563' }
-    : { background: '#f8fafc', text: '#0f172a', searchBg: '#fff' };
+   return (
+  <View style={styles.container}>
+    {/* TOP BAR */}
+    <View style={styles.topBar}>
+      <Text style={styles.title}>
+        Welcome, {username || 'User'}!
+      </Text>
 
-  return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* TOP BAR */}
-      <View style={styles.topBar}>
-        <Text style={[styles.title, { color: colors.text }]}>
-          Welcome, {username || 'User'}!
+      <View style={styles.topBarStyle}>
+        <TouchableOpacity
+          onPress={() => setShowNotifications(true)}
+          style={styles.notificationIcon}
+        >
+          <NotificationIcon color="#0f172a" />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleLogout}>
+          <LogoutIcon color="red" />
+        </TouchableOpacity>
+      </View>
+    </View>
+
+    {/* NOTIFICATION MODAL */}
+    <Modal visible={showNotifications} transparent animationType="fade">
+      <TouchableOpacity
+        style={styles.modalOverlay}
+        onPress={() => setShowNotifications(false)}
+      />
+      <View style={styles.modalContent}>
+        <Text>
+          Notifications
         </Text>
+        <FlatList
+          data={notifications}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <Text style={styles.notificationMsg}>{item.title}</Text>
+          )}
+        />
+      </View>
+    </Modal>
 
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity
-            onPress={() => setShowNotifications(true)}
-            style={{ marginRight: 16 }}
-          >
-            <NotificationIcon color={darkMode ? '#f1f5f9' : '#0f172a'} />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={handleLogout}>
-            <LogoutIcon color="red" />
-          </TouchableOpacity>
-        </View>
+    {/* SCROLL CONTENT */}
+    <ScrollView contentContainerStyle={styles.content}>
+      {/* CLOCK */}
+      <View style={styles.clockCard}>
+        <Text style={styles.clockTime}>{formatTime(time)}</Text>
+        <Text style={styles.clockDate}>{formatDate(time)}</Text>
+        <Text style={styles.clockDate}>{getGreeting()}</Text>
       </View>
 
-      {/* NOTIFICATION MODAL */}
-      <Modal visible={showNotifications} transparent animationType="fade">
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          onPress={() => setShowNotifications(false)}
-        />
-        <View style={styles.modalContent}>
-          <Text style={{ fontWeight: '700', fontSize: 16, marginBottom: 10 }}>
-            Notifications
-          </Text>
-          <FlatList
-            data={notifications}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <Text style={{ paddingVertical: 8, fontSize: 14 }}>{item.title}</Text>
-            )}
-          />
-        </View>
-      </Modal>
+     {/* CARDS */}
+<View style={styles.grid}>
+  <Card style={[styles.card, styles.cardBlue]} onPress={() => navigation.navigate('Employee')}>
+    <Text style={styles.cardTitle}>Employees</Text>
+  </Card>
 
-      {/* SCROLL CONTENT */}
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* CLOCK */}
-        <View style={styles.clockCard}>
-          <Text style={styles.clockTime}>{formatTime(time)}</Text>
-          <Text style={styles.clockDate}>{formatDate(time)}</Text>
-          <Text style={styles.clockDate}>{getGreeting()}</Text>
-        </View>
+  <Card style={[styles.card, styles.cardGreen]} onPress={() => navigation.navigate('Roster')}>
+    <Text style={styles.cardTitle}>Roster</Text>
+  </Card>
 
-        {/* CARDS */}
-        <View style={styles.grid}>
-          <Card
-            style={styles.card}
-            onPress={() => navigation.navigate('Employee')}
-          >
-            <Text style={styles.cardTitle}>Employees</Text>
-          </Card>
+  <Card style={[styles.card, styles.cardPurple]} onPress={() => navigation.navigate('Reports')}>
+    <Text style={styles.cardTitle}>Reports</Text>
+  </Card>
 
-          <Card
-            style={[styles.card, { backgroundColor: '#16a34a' }]}
-            onPress={() => navigation.navigate('Roster')}
-          >
-            <Text style={styles.cardTitle}>Roster</Text>
-          </Card>
+  <Card style={[styles.card, styles.cardOrange]} onPress={() => navigation.navigate('Leave')}>
+    <Text style={styles.cardTitle}>Leave</Text>
+  </Card>
 
-          <Card
-            style={[styles.card, { backgroundColor: '#7c3aed' }]}
-            onPress={() => navigation.navigate('Reports')}
-          >
-            <Text style={styles.cardTitle}>Reports</Text>
-          </Card>
+  <Card style={[styles.card, styles.cardTeal]} onPress={() => navigation.navigate('LockScreen')}>
+    <Text style={styles.cardTitle}>Screen Lock</Text>
+  </Card>
 
-          <Card
-            style={[styles.card, { backgroundColor: '#7c3aed' }]}
-            onPress={() => navigation.navigate('Leave')}
-          >
-            <Text style={styles.cardTitle}>Leave</Text>
-          </Card>
-
-          <Card
-            style={[styles.card, { backgroundColor: '#241b33' }]}
-            onPress={() => navigation.navigate('LockScreen')}
-          >
-            <Text style={styles.cardTitle}>Screen Lock</Text>
-          </Card>
-
-          <Card
-            style={[styles.card, { backgroundColor: '#241b33' }]}
-            onPress={() => navigation.navigate('MyProfile')}
-          >
-            <Text style={styles.cardTitle}>My Profile</Text>
-          </Card>
-        </View>
-      </ScrollView>
-    </View>
-  );
+  <Card style={[styles.card, styles.cardPink]} onPress={() => navigation.navigate('MyProfile')}>
+    <Text style={styles.cardTitle}>My Profile</Text>
+  </Card>
+</View>
+    </ScrollView>
+  </View>
+);
 };
 
 export default DashboardScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 16 },
+  container: { flex: 1, paddingHorizontal: 16 , backgroundColor: '#ffffff'},
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -270,19 +244,29 @@ const styles = StyleSheet.create({
   clockTime: { fontSize: 34, fontWeight: '700', color: '#38bdf8' },
   clockDate: { fontSize: 13, color: '#e5e7eb', marginTop: 4 },
   grid: {
-    flexDirection: 'row',
+   flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
   card: {
     width: '48%',
-    paddingVertical: 25,
+    paddingVertical: 30,
     marginBottom: 16,
-    borderRadius: 18,
+    borderRadius: 16,
     alignItems: 'center',
-    backgroundColor: '#2563eb',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#e2e8f0', // subtle border for professional look
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  cardTitle: { fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
+   },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalContent: {
     position: 'absolute',
@@ -293,5 +277,35 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     elevation: 6,
+  },
+
+  notificationMsg: {
+    paddingVertical: 8, fontSize: 14
+  },
+
+  topBarStyle:{
+     flexDirection: 'row', alignItems: 'center' 
+  },
+  notificationIcon: {
+    marginRight: 16
+  },
+  // Color variations
+  cardBlue: {
+    backgroundColor: '#2563eb',
+  },
+  cardGreen: {
+    backgroundColor: '#16a34a',
+  },
+  cardPurple: {
+    backgroundColor: '#7c3aed',
+  },
+  cardOrange: {
+    backgroundColor: '#f97316',
+  },
+  cardTeal: {
+    backgroundColor: '#0d9488',
+  },
+  cardPink: {
+    backgroundColor: '#db2777',
   },
 });

@@ -7,6 +7,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Card, Portal, Dialog, Button, Chip } from 'react-native-paper';
+import { ApiFetch } from '../../config/apiHelper';
+import { API_ENDPOINTS } from '../../config/apiRoutes';
 
 /* ================= TYPES ================= */
 type LeaveType = {
@@ -30,22 +32,35 @@ const LeaveScreen = () => {
   const [leaves, setLeaves] = useState<LeaveType[]>([]);
   const [selectedLeave, setSelectedLeave] = useState<LeaveType | null>(null);
   const [visible, setVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   /* ================= API CALL ================= */
   useEffect(() => {
-    setLoading(true);
-    fetch(
-      'http://45.251.56.104:82/api/Hrleave/GetEmpLeaveApplication?selectedempId=&deptid=-1&month=1&year=2026&status=0',
-    )
-      .then(res => res.json())
-      .then(json => {
-        if (json.success) {
-          setLeaves(json.data);
-        }
-      })
-      .catch(err => console.log('Leave API Error:', err))
-      .finally(() => setLoading(false));
+    const fetchLeaves = async () => {
+      try {
+        setLoading(true);
+        // Replace with actual userId if needed
+        const userId = 46; //bijon[48] =(admin), Maha[46]= (HR)
+        const data: LeaveType[] = await ApiFetch(
+          `${API_ENDPOINTS.HRM.GET_MENUS}?userid=${userId}`
+        );
+
+        console.log('Fetched Leaves Data:', data);
+
+
+        // Example: filter only Leave menu items if API returns all menus
+        const leaveData = data.filter((item) =>
+          item.LeaveType || item.LeaveStatus
+        );
+        setLeaves(leaveData);
+      } catch (err) {
+        console.warn('Failed to fetch leaves', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaves();
   }, []);
 
   /* ================= DIALOG ================= */
@@ -88,12 +103,19 @@ const LeaveScreen = () => {
   /* ================= UI ================= */
   return (
     <View style={styles.container}>
-      <FlatList
-        data={leaves}
-        keyExtractor={item => item.id.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={{ padding: 15 }}
-      />
+      {loading ? (
+        <View style={styles.loaderOverlay}>
+          <ActivityIndicator size="large" color="#2563eb" />
+          <Text style={styles.loadingText}>Loading leave list...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={leaves}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={{ padding: 15 }}
+        />
+      )}
 
       {/* 🔹 DETAILS POPUP */}
       <Portal>
@@ -139,14 +161,6 @@ const LeaveScreen = () => {
           </Dialog.Actions>
         </Dialog>
       </Portal>
-
-      {/* 🔹 DARK LOADER */}
-      {loading && (
-        <View style={styles.loaderOverlay}>
-          <ActivityIndicator size="large" color="#fff" />
-          <Text style={styles.loadingText}>Loading leave list...</Text>
-        </View>
-      )}
     </View>
   );
 };
@@ -157,13 +171,16 @@ export default LeaveScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f1f5f9',
   },
   card: {
-    padding: 14,
+    padding: 16,
     marginBottom: 12,
-    borderRadius: 14,
-    elevation: 3,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    backgroundColor: '#ffffff',
+    elevation: 2,
   },
   row: {
     flexDirection: 'row',
@@ -171,12 +188,13 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    color: '#1e293b',
   },
   sub: {
     fontSize: 12,
     color: '#64748b',
-    marginTop: 2,
+    marginTop: 4,
   },
 
   /* Status */
@@ -188,10 +206,10 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   pending: {
-    backgroundColor: '#f97316',
+    backgroundColor: '#f97316', // orange
   },
   approved: {
-    backgroundColor: '#16a34a',
+    backgroundColor: '#16a34a', // green
   },
 
   /* Dialog */
@@ -208,13 +226,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 999,
   },
   loadingText: {
-    color: '#fff',
+    color: '#1e293b',
     marginTop: 10,
   },
 });
