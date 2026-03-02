@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Card, Portal, Dialog, Button, Chip } from 'react-native-paper';
-import { ApiFetch } from '../../config/apiHelper';
+import { get } from '../../config/apiHelper';
 import { API_ENDPOINTS } from '../../config/apiRoutes';
 
 /* ================= TYPES ================= */
@@ -27,6 +27,28 @@ type LeaveType = {
   ManagerNote: string | null;
 };
 
+interface Permission {
+  id: number;
+  value: string;
+  isActive: boolean;
+}
+
+interface Menu {
+  id: number;
+  parentId: number;
+  name: string;
+  title: string;
+  treeLevel: number;
+  componentKey: string;
+  url: string;
+  children: Menu[];
+  permissionList?: Permission[];
+}
+
+interface GetMenusResponse {
+  menuItems: Menu[];
+}
+
 /* ================= COMPONENT ================= */
 const LeaveScreen = () => {
   const [leaves, setLeaves] = useState<LeaveType[]>([]);
@@ -36,32 +58,44 @@ const LeaveScreen = () => {
 
   /* ================= API CALL ================= */
   useEffect(() => {
-    const fetchLeaves = async () => {
-      try {
-        setLoading(true);
-        // Replace with actual userId if needed
-        const userId = 46; //bijon[48] =(admin), Maha[46]= (HR)
-        const data: LeaveType[] = await ApiFetch(
-          `${API_ENDPOINTS.HRM.GET_MENUS}?userid=${userId}`
-        );
+  const fetchMenus = async (): Promise<void> => {
+    try {
+      setLoading(true);
 
-        console.log('Fetched Leaves Data:', data);
+      const userId: number = 46;
 
+      const response: GetMenusResponse = await get(
+        `${API_ENDPOINTS.HRM.GET_MENUS}?userid=${userId}`
+      );
 
-        // Example: filter only Leave menu items if API returns all menus
-        const leaveData = data.filter((item) =>
-          item.LeaveType || item.LeaveStatus
-        );
-        setLeaves(leaveData);
-      } catch (err) {
-        console.warn('Failed to fetch leaves', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const menus: Menu[] = response?.menuItems ?? [];
 
-    fetchLeaves();
-  }, []);
+      console.log("First :", response);
+      // ✅ Only root level
+      const topLevelMenus: Menu[] = menus.filter(
+        (menu: Menu) =>
+          menu.parentId === 0 && menu.treeLevel === 1
+      );
+
+      console.log("Top Level Menus:", topLevelMenus);
+
+      // Example: যদি Leave সম্পর্কিত কিছু filter করতে চাও
+      // const leaveData = menus.filter(
+      //   (menu: Menu) =>
+      //     menu.name?.toLowerCase().includes("leave")
+      // );
+
+     // setLeaves(leaveData);
+
+    } catch (err: unknown) {
+      console.warn("Failed to fetch menus", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchMenus();
+}, []);
 
   /* ================= DIALOG ================= */
   const showDialog = (item: LeaveType) => {
