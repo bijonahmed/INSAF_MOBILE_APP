@@ -52,7 +52,7 @@ const Login = (): React.ReactElement => {
         await post(API_ENDPOINTS.LOGIN, {
           username: username.trim(),
           userpassword: userpassword.trim(),
-        });
+        },{} as any);
 
       if (data?.data?.token) {
       

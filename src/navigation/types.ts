@@ -10,4 +10,5 @@ export type RootStackParamList = {
   MyProfileScreen: undefined; // add if you have
   Main: undefined; // for drawer navigator
   MyProfile: undefined; // add if you have
+  Attendance: undefined; // add if you have
 };

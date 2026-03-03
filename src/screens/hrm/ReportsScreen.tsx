@@ -1,79 +1,64 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { Card } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/types';
+
+type NavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Reports'
+>;
 
 const ReportsScreen = () => {
-  const [department, setDepartment] = useState("");
-  const [designation, setDesignation] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-  const [status, setStatus] = useState("");
-
-  const handleGenerate = () => {
-    console.log({
-      department,
-      designation,
-      dateFrom,
-      dateTo,
-      status,
-    });
-  };
+  const navigation = useNavigation<NavigationProp>();
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.card}>
-          <Text style={styles.title}>HR Reports Filter</Text>
+      <Text style={styles.header}>Reports</Text>
 
-          <TextInput
-            label="Department"
-            mode="outlined"
-            value={department}
-            onChangeText={setDepartment}
-            style={styles.input}
-          />
+      <View style={styles.grid}>
+        {/* Attendance */}
+        <Card
+          style={styles.card}
+          onPress={() => navigation.navigate('Attendance')}
+        >
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Attendance</Text>
+            <Text style={styles.cardSub}>Details Report</Text>
+          </View>
+        </Card>
 
-          <TextInput
-            label="Designation"
-            mode="outlined"
-            value={designation}
-            onChangeText={setDesignation}
-            style={styles.input}
-          />
+        {/* Late */}
+        <Card
+          style={styles.card}
+          onPress={() => navigation.navigate('Roster')} // change if needed
+        >
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Late</Text>
+          </View>
+        </Card>
 
-          <TextInput
-            label="Date From (YYYY-MM-DD)"
-            mode="outlined"
-            value={dateFrom}
-            onChangeText={setDateFrom}
-            style={styles.input}
-          />
+        {/* Salary */}
+        <Card
+          style={styles.card}
+          onPress={() => navigation.navigate('Dashboard')} // change if needed
+        >
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Salary</Text>
+          </View>
+        </Card>
 
-          <TextInput
-            label="Date To (YYYY-MM-DD)"
-            mode="outlined"
-            value={dateTo}
-            onChangeText={setDateTo}
-            style={styles.input}
-          />
-
-          <TextInput
-            label="Status (Active / Inactive)"
-            mode="outlined"
-            value={status}
-            onChangeText={setStatus}
-            style={styles.input}
-          />
-
-          <Button
-            mode="contained"
-            style={styles.button}
-            onPress={handleGenerate}
-          >
-            Generate Report
-          </Button>
-        </View>
-      </ScrollView>
+        {/* Payslip */}
+        <Card
+          style={styles.card}
+          onPress={() => navigation.navigate('MyProfile')} // change if needed
+        >
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>Payslip</Text>
+          </View>
+        </Card>
+      </View>
     </View>
   );
 };
@@ -83,41 +68,40 @@ export default ReportsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: '#f1f5f9',
+    padding: 16,
   },
-
-  scroll: {
-    padding: 20,
-  },
-
-  card: {
-    backgroundColor: "#ffffff",
-    padding: 20,
-    borderRadius: 18,
-
-    elevation: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-  },
-
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
+  header: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 20,
-    color: "#0f172a",
-    textAlign: "center",
+    color: '#1e293b',
   },
-
-  input: {
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  card: {
+    width: '48%',
     marginBottom: 16,
-    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    backgroundColor: '#ffffff',
+    elevation: 4,
   },
-
-  button: {
-    marginTop: 10,
-    borderRadius: 10,
-    paddingVertical: 6,
+  cardContent: {
+    padding: 24,
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1e293b',
+  },
+  cardSub: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 6,
   },
 });
