@@ -12,6 +12,7 @@ import MyProfileScreen from '../screens/MyProfileScreen';
 import AttendanceScreen from '../screens/hrm/report/AttendanceScreen';
 import AddLeave from '../screens/hrm/leave/AddLeave';
 import LeaveScreen from '../screens/hrm/leave/LeaveScreen';
+import LeaveHistory from '../screens/hrm/leave/LeaveHistoryScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -48,6 +49,7 @@ export default function AppNavigator() {
       <Stack.Screen name="MyProfile" component={MyProfileScreen} />
       <Stack.Screen name="Attendance" component={AttendanceScreen} />
       <Stack.Screen name="AddLeave" component={AddLeave} />
+      <Stack.Screen name="LeaveHistory" component={LeaveHistory} />
     </Stack.Navigator>
   );
 }

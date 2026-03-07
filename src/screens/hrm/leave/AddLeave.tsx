@@ -10,8 +10,31 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import { get, post } from '../../../config/apiHelper';
+import { get, post, put } from '../../../config/apiHelper';
 import { API_ENDPOINTS } from '../../../config/apiRoutes';
+import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+interface UserInfo {
+  id: number;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  rolename: string;
+  lastLoginAt: string;
+}
+// Type for navigation
+type RootStackParamList = {
+  Leave: undefined;
+  AddLeave: undefined;
+  LeaveHistory: undefined;
+};
+type LeaveScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Leave'
+>;
 
 const AddLeaveScreen = () => {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -26,6 +49,8 @@ const AddLeaveScreen = () => {
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<UserInfo | null>(null);
+  const navigation = useNavigation<LeaveScreenNavigationProp>();
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -37,11 +62,14 @@ const AddLeaveScreen = () => {
         }
 
         const deptRes = await get(API_ENDPOINTS.HRM.GET_HR_LEAVE_TYPES);
-        // if (deptRes?.data && Array.isArray(deptRes.data)) {
-        //  console.log('Response Data: ' + deptRes.data);
         setLeaveTypes(deptRes.data);
-        //  }
 
+        const userStr = await AsyncStorage.getItem('user_info');
+        if (userStr) {
+          const parsedUser = JSON.parse(userStr);
+          setUser(parsedUser);
+          // console.log('User Info:', parsedUser); // log user info on load
+        }
         setLoading(false);
       } catch (error) {
         console.log('Error fetching employees:', error);
@@ -53,44 +81,50 @@ const AddLeaveScreen = () => {
 
   const handleSubmit = async () => {
     if (!fromDate || !toDate || !leaveClass || !reason) {
-      alert('Please fill all required fields.');
+      Alert.alert('Validation', 'Please fill all required fields.');
       return;
     }
 
     const body = {
-      employeeId: 16, // you can replace with selectedEmployee.id
-      fromDate: fromDate.toISOString().split('T')[0],
-      toDate: toDate.toISOString().split('T')[0],
-      leaveClass,
-      replacementEmployeeId: replacementEmployee?.employeeid || null,
-      leaveReason: reason,
-      leaveAddress,
+      Id: 0,
+      EmployeeId: user?.id,
+      FromDate: fromDate.toISOString().split('T')[0],
+      ToDate: toDate.toISOString().split('T')[0],
+      LeaveTypeID: leaveClass,
+      Reason: reason,
+      leaveAddress: leaveAddress,
+      replacementId: replacementEmployee?.employeeid || null,
     };
 
+    console.log('Checked body:', body);
+
     try {
-      const res = await post(
-        API_ENDPOINTS.HRM.SAVE_LEAVE_APPLICATION,
-        body,
-        {} as any,
-      );
+      const res = await put(API_ENDPOINTS.HRM.SAVE_LEAVE_APPLICATION, body);
+
       console.log('Full Response:', res);
 
       if (res?.success) {
-        alert('Leave submitted successfully!');
-        // reset fields
+        Alert.alert('Success', res?.message || 'Leave submitted successfully!');
+
         setFromDate(null);
         setToDate(null);
         setLeaveClass('');
         setReason('');
         setLeaveAddress('');
         setReplacementEmployee(null);
+
+        navigation.navigate('LeaveHistory');
       } else {
-        alert('Failed to submit leave. Please try again.');
+        Alert.alert('Error', res?.message || 'Failed to submit leave.');
       }
-      console.log('Leave request response:', res);
-    } catch (error) {
+    } catch (error: any) {
       console.log('Leave request error:', error);
-      alert('An error occurred while submitting leave.');
+
+      const apiMessage =
+        error?.response?.data?.message ||
+        'An error occurred while submitting leave.';
+
+      Alert.alert('Error', apiMessage);
     }
   };
 

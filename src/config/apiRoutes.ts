@@ -27,12 +27,7 @@ export const API_ENDPOINTS = {
     GetEmpLeaveInfo: buildUrl(API_v1, "Hrleave/GetEmpLeaveBalance"),
     GET_HR_LEAVE_TYPES: buildUrl(API_v1, "HrManagement/GetHrLeaveTypeList"),
     SAVE_LEAVE_APPLICATION: buildUrl(API_v1,"/HrLeave/SaveLeaveApplication"),
-    //  GET_HR_LEAVE_TYPES: HrManagement.url("GetHrLeaveTypeList"),
-    // GET_USERS: buildUrl(API_v2, "SecUsers/GetUsers"),
-    // DELETE_ROLE: buildUrl(API_v2, "SecRoles/DeleteRole"),
-    // SAVE_ROLE: buildUrl(API_v2, "SecRoles/SaveRole"),
-    // GET_ALL_MENUS: buildUrl(API_v2, "SecMenuRolePermission/AllMenuList"),
-    // SIDE_MENUS: buildUrl(API_v2, "SecMenuRolePermission/SideMenuList"),
+    
   },
 
   // Employment / Employee

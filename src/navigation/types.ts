@@ -12,4 +12,5 @@ export type RootStackParamList = {
   MyProfile: undefined;
   Attendance: undefined;
   AddLeave: undefined;
+  LeaveHistory: undefined;
 };
