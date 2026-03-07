@@ -7,8 +7,22 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
-import { get, getUserInfo } from '../../config/apiHelper';
-import { API_ENDPOINTS } from '../../config/apiRoutes';
+import { get, getUserInfo } from '../../../config/apiHelper';
+import { API_ENDPOINTS } from '../../../config/apiRoutes';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+
+// Type for navigation
+type RootStackParamList = {
+  Leave: undefined;
+  AddLeave: undefined;
+  LeaveHistory: undefined;
+};
+
+type LeaveScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Leave'
+>;
 
 const leaveGroups = [
   {
@@ -52,6 +66,7 @@ const leaveGroups = [
 const LeaveScreen = () => {
   const [leaveBalance, setLeaveBalance] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const navigation = useNavigation<LeaveScreenNavigationProp>();
 
   useEffect(() => {
     fetchLeaveBalance();
@@ -61,9 +76,10 @@ const LeaveScreen = () => {
     try {
       setLoading(true);
       const userInfo = await getUserInfo();
-      const userId = userInfo?.id; //16;
+      const userId = userInfo?.id;
       const yearValue = new Date().getFullYear();
       const url = `${API_ENDPOINTS.HRM.GetEmpLeaveInfo}?empid=${userId}&year=${yearValue}`;
+
       const res = await get(url);
       setLeaveBalance(res?.data?.balance || null);
       setLoading(false);
@@ -74,13 +90,11 @@ const LeaveScreen = () => {
   };
 
   const handleLeaveRequest = () => {
-    console.log('Navigate to Leave Request screen');
-    // You can navigate to a different screen using React Navigation
+    navigation.navigate('AddLeave'); // Navigate to Add Leave screen
   };
 
   const handleLeaveHistory = () => {
-    console.log('Navigate to Leave History screen');
-    // You can navigate to a different screen using React Navigation
+    navigation.navigate('LeaveHistory'); // Navigate to Leave History screen
   };
 
   return (

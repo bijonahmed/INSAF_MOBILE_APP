@@ -25,6 +25,9 @@ export const API_ENDPOINTS = {
     GET_MENUS: buildUrl(API_v2, "SecUsers/LoginMenu"),
     GetMisReportHR: buildUrl(API_v1, "Misreport/GetMisReportHR"),
     GetEmpLeaveInfo: buildUrl(API_v1, "Hrleave/GetEmpLeaveBalance"),
+    GET_HR_LEAVE_TYPES: buildUrl(API_v1, "HrManagement/GetHrLeaveTypeList"),
+    SAVE_LEAVE_APPLICATION: buildUrl(API_v1,"/HrLeave/SaveLeaveApplication"),
+    //  GET_HR_LEAVE_TYPES: HrManagement.url("GetHrLeaveTypeList"),
     // GET_USERS: buildUrl(API_v2, "SecUsers/GetUsers"),
     // DELETE_ROLE: buildUrl(API_v2, "SecRoles/DeleteRole"),
     // SAVE_ROLE: buildUrl(API_v2, "SecRoles/SaveRole"),
@@ -35,7 +38,6 @@ export const API_ENDPOINTS = {
   // Employment / Employee
   EMPLOYMENT: {
     GET_EMPLOYEE_LIST: buildUrl(API_v1, "Employment/GetEmployeeList"),
-
     // GET_EMPLOYEE_SEARCH: buildUrl(API_v1, "Employment/GetEmployeeListSearch"),
     // GET_EMPLOYEE_RESIGN_LIST: buildUrl(API_v1, "Employment/GetEmployeeResignList"),
     // GET_EMPLOYEE_DTL: buildUrl(API_v1, "Employment/GetEmployeeDtl"),

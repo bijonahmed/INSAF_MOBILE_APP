@@ -6,12 +6,13 @@ import LoginScreen from '../screens/Login';
 import DashboardScreen from '../screens/DashboardScreen';
 import EmployeeScreen from '../screens/hrm/EmployeeScreen';
 import RosterScreen from '../screens/hrm/RosterScreen';
-import LeaveScreen from '../screens/hrm/LeaveScreen';
 import ReportsScreen from '../screens/hrm/ReportsScreen';
 import LockScreen from '../screens/hrm/LockScreen';
-import MyProfileScreen from '../screens/MyProfileScreen'; 
+import MyProfileScreen from '../screens/MyProfileScreen';
 import AttendanceScreen from '../screens/hrm/report/AttendanceScreen';
- 
+import AddLeave from '../screens/hrm/leave/AddLeave';
+import LeaveScreen from '../screens/hrm/leave/LeaveScreen';
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
@@ -21,22 +22,21 @@ export default function AppNavigator() {
       screenOptions={{
         headerShown: true,
         headerStyle: {
-          backgroundColor: '#1f2937', 
+          backgroundColor: '#1f2937',
         },
         headerTintColor: '#fff',
         headerTitleStyle: {
-          fontWeight: 'bold', 
+          fontWeight: 'bold',
         },
       }}
     >
- 
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
 
       <Stack.Screen
         name="Dashboard"
         component={DashboardScreen}
-        options={{ headerBackVisible: false }} 
+        options={{ headerBackVisible: false }}
       />
 
       {/* HRM Screens */}
@@ -46,8 +46,8 @@ export default function AppNavigator() {
       <Stack.Screen name="Reports" component={ReportsScreen} />
       <Stack.Screen name="LockScreen" component={LockScreen} />
       <Stack.Screen name="MyProfile" component={MyProfileScreen} />
-       <Stack.Screen name="Attendance" component={AttendanceScreen} />
-
+      <Stack.Screen name="Attendance" component={AttendanceScreen} />
+      <Stack.Screen name="AddLeave" component={AddLeave} />
     </Stack.Navigator>
   );
 }
