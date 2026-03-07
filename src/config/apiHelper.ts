@@ -99,7 +99,13 @@ const request = async (
 };
 
 // Public Methods
-export const get = (url: string, p0: { params: { dateFrom: string; dateTo: string; DataId: number; }; }) => request('GET', url);
+export const get = <T = any>(
+  url: string,
+  config?: { params?: Record<string, any> }
+): Promise<T> => {
+  return request('GET', url, config);
+};
+//export const get = (url: string, p0: { params: { dateFrom: string; dateTo: string; DataId: number; }; }) => request('GET', url);
 export const post = (url: string, body: any, p0: { headers: { 'Content-Type': string; Authorization: string; }; }) => request('POST', url, body);
 export const put = (url: string, body: any) => request('PUT', url, body);
 export const del = (url: string) => request('DELETE', url);

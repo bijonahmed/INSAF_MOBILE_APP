@@ -22,8 +22,9 @@ export const API_ENDPOINTS = {
   LOGIN: buildUrl(API_v2, "SecUsers/Login"),
   // HRM - Role & Menu
   HRM: {
-     GET_MENUS: buildUrl(API_v2, "SecUsers/LoginMenu"),
-     GetMisReportHR: buildUrl(API_v1, "Misreport/GetMisReportHR"),
+    GET_MENUS: buildUrl(API_v2, "SecUsers/LoginMenu"),
+    GetMisReportHR: buildUrl(API_v1, "Misreport/GetMisReportHR"),
+    GetEmpLeaveInfo: buildUrl(API_v1, "Hrleave/GetEmpLeaveBalance"),
     // GET_USERS: buildUrl(API_v2, "SecUsers/GetUsers"),
     // DELETE_ROLE: buildUrl(API_v2, "SecRoles/DeleteRole"),
     // SAVE_ROLE: buildUrl(API_v2, "SecRoles/SaveRole"),
