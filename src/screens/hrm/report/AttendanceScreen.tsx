@@ -191,6 +191,7 @@ const AttendanceScreen = () => {
               {/* Filter Chips (show only after generating report) */}
               {showFilterChips && (
                 <View
+                  // eslint-disable-next-line react-native/no-inline-styles
                   style={{
                     flexDirection: 'row',
                     justifyContent: 'space-around',
@@ -202,10 +203,12 @@ const AttendanceScreen = () => {
                     <Chip
                       key={status}
                       mode={filterStatus === status ? 'flat' : 'outlined'}
+                      // eslint-disable-next-line react-native/no-inline-styles
                       style={{
                         backgroundColor:
-                          filterStatus === status ? '#3b82f6' : '#f8fafc',
+                          filterStatus === status ? '#010611' : '#f8fafc',
                       }}
+                      // eslint-disable-next-line react-native/no-inline-styles
                       textStyle={{
                         color: filterStatus === status ? '#fff' : '#1e293b',
                       }}
@@ -290,8 +293,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 5,
     paddingVertical: 2,
-    backgroundColor: '#3b82f6',
-    shadowColor: '#3b82f6',
+    backgroundColor: '#010611',
+    shadowColor: '#010611',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,

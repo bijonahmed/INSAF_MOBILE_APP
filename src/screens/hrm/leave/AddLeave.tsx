@@ -281,17 +281,13 @@ const AddLeaveScreen = () => {
 export default AddLeaveScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fef2f2', padding: 12 },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 25,
-    padding: 20,
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 15,
-    shadowOffset: { width: 0, height: 8 },
-  },
+ container: {
+  flex: 1,
+  backgroundColor: '#f8fafc',
+  paddingHorizontal: 16,
+  paddingTop: 20,
+},
+ 
   label: { fontWeight: '600', marginBottom: 6, color: '#374151', fontSize: 14 },
   input: {
     borderWidth: 1,

@@ -11,7 +11,30 @@ import { get, getUserInfo } from '../../../config/apiHelper';
 import { API_ENDPOINTS } from '../../../config/apiRoutes';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
+import Svg, { Path } from "react-native-svg";
 
+const LeaveRequestIcon = ({ size = 20, color = "#fff" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path
+      d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 
+      0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 
+      1.41-1.41L12 14.17l5.59-5.59L19 10l-7 7z"
+      fill={color}
+    />
+  </Svg>
+);
+const LeaveHistoryIcon = ({ size = 20, color = "#fff" }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path
+      d="M13 3a9 9 0 1 0 8.95 10H20a7 7 0 1 1-2.05-4.95L15 11h7V4l-2.55 2.55A8.96 8.96 0 0 0 13 3z"
+      fill={color}
+    />
+    <Path
+      d="M12 7h2v6l4 2-1 1-5-3V7z"
+      fill={color}
+    />
+  </Svg>
+);
 // Type for navigation
 type RootStackParamList = {
   Leave: undefined;
@@ -100,18 +123,23 @@ const LeaveScreen = () => {
   return (
     <ScrollView style={styles.container}>
       {/* Top Buttons */}
-      <View style={styles.topButtonContainer}>
-        <TouchableOpacity style={styles.topButton} onPress={handleLeaveRequest}>
-          <Text style={styles.topButtonText}>Leave Request</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.topButton} onPress={handleLeaveHistory}>
-          <Text style={styles.topButtonText}>Leave History</Text>
-        </TouchableOpacity>
-      </View>
+     <View style={styles.topButtonContainer}>
+  
+  <TouchableOpacity style={styles.topButton} onPress={handleLeaveRequest}>
+    <LeaveRequestIcon size={20} />
+    <Text style={styles.topButtonText}> Leave Request</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity style={styles.topButton} onPress={handleLeaveHistory}>
+    <LeaveHistoryIcon size={20} />
+    <Text style={styles.topButtonText}> Leave History</Text>
+  </TouchableOpacity>
+
+</View>
 
       {/* Leave Balance */}
-      <View style={styles.card}>
-        <Text style={styles.title}>Leave Balance</Text>
+      <View style={styles.marginTop20}>
+        {/* <Text style={styles.title}>Leave Balance</Text> */}
         {loading ? (
           <ActivityIndicator size="large" color="#3b82f6" />
         ) : leaveBalance ? (
@@ -153,7 +181,15 @@ const LeaveScreen = () => {
 export default LeaveScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f0f4f8' },
+  container: { flex: 1,
+  width: '100%',
+  alignSelf: 'stretch',
+  backgroundColor: '#f0f4f8',
+ },
+
+   marginTop20: {
+    marginTop: 20,
+  },
   topButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -161,19 +197,23 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   topButton: {
-    flex: 1,
-    marginHorizontal: 5,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: '#3b82f6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  topButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#010611",
+  paddingVertical: 10,
+  paddingHorizontal: 16,
+  borderRadius: 8,
+},
+
+topButtonText: {
+  color: "#fff",
+  marginLeft: 6,
+  fontWeight: "600",
+},
   card: {
     marginHorizontal: 20,
     marginVertical: 20,
-    padding: 16,
+    padding: 5,
     borderRadius: 20,
     backgroundColor: '#fff',
     elevation: 8,

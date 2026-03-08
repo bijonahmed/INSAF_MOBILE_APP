@@ -26,8 +26,9 @@ export const API_ENDPOINTS = {
     GetMisReportHR: buildUrl(API_v1, "Misreport/GetMisReportHR"),
     GetEmpLeaveInfo: buildUrl(API_v1, "Hrleave/GetEmpLeaveBalance"),
     GET_HR_LEAVE_TYPES: buildUrl(API_v1, "HrManagement/GetHrLeaveTypeList"),
-    SAVE_LEAVE_APPLICATION: buildUrl(API_v1,"/HrLeave/SaveLeaveApplication"),
-    
+    SAVE_LEAVE_APPLICATION: buildUrl(API_v1, "/HrLeave/SaveLeaveApplication"),
+    GetMonthlyRosterByEmpId: buildUrl(API_v1, "/HrDutyRoster/GetMonthlyRosterByEmpId"),
+
   },
 
   // Employment / Employee

@@ -48,8 +48,8 @@ export default function AppNavigator() {
       <Stack.Screen name="LockScreen" component={LockScreen} />
       <Stack.Screen name="MyProfile" component={MyProfileScreen} />
       <Stack.Screen name="Attendance" component={AttendanceScreen} />
-      <Stack.Screen name="AddLeave" component={AddLeave} />
-      <Stack.Screen name="LeaveHistory" component={LeaveHistory} />
+      <Stack.Screen name="AddLeave" component={AddLeave} options={{ title: "Add Leave" }} />
+      <Stack.Screen name="LeaveHistory" component={LeaveHistory} options={{ title: "Leave History" }} />
     </Stack.Navigator>
   );
 }
