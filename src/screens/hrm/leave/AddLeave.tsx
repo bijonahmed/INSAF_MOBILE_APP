@@ -333,6 +333,7 @@ const styles = StyleSheet.create({
   },
   resetText: { color: '#374151', fontWeight: 'bold', fontSize: 16 },
 });
+
 function alert(arg0: string) {
   throw new Error('Function not implemented.');
 }

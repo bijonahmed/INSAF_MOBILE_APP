@@ -64,6 +64,7 @@ const EmployeeScreen = () => {
         const empRes = await get(API_ENDPOINTS.EMPLOYMENT.GET_EMPLOYEE_LIST);
         if (empRes?.data && Array.isArray(empRes.data)) {
           setEmployees(empRes.data);
+       //   console.log("Test:" + empRes.data);
           setDisplayEmployees(empRes.data.slice(0, ITEMS_PER_LOAD));
         }
 
@@ -197,13 +198,14 @@ const EmployeeScreen = () => {
               {selectedEmployee && (
                 <>
                   <Text style={styles.modalTitle}>{selectedEmployee.employeename}</Text>
-                  <Text style={styles.detailText}>Code: {selectedEmployee.employeecode}</Text>
+                  <Text style={styles.detailText}>ID: {selectedEmployee.employeecode}</Text>
                   <Text style={styles.detailText}>Department: {selectedEmployee.departmentname || 'N/A'}</Text>
-                  <Text style={styles.detailText}>Job Title: {selectedEmployee.jobtitle || 'N/A'}</Text>
+                  <Text style={styles.detailText}>Designation: {selectedEmployee.jobtitle || 'N/A'}</Text>
                   <Text style={styles.detailText}>Mobile: {selectedEmployee.mobilephone}</Text>
                   <Text style={styles.detailText}>Supervisor: {selectedEmployee.supervisorname || 'N/A'}</Text>
                   <Text style={styles.detailText}>Status: {selectedEmployee.is_active ? 'Active' : 'Inactive'}</Text>
                   <Text style={styles.detailText}>Joined: {selectedEmployee.joineddate}</Text>
+             
                 </>
               )}
               <Button

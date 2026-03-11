@@ -26,6 +26,8 @@ type AttendanceItem = {
   scheduledMinutes: number;
   scheduledMorningIn: string | null;
   actualMorningIn: string | null;
+  actualNightIn: string | null;
+  actualNightOut: string | null;
   scheduledMorningOut: string | null;
   actualMorningOut: string | null;
 };
@@ -79,7 +81,7 @@ const AttendanceScreen = () => {
       setShowFilterChips(true);
       setFilterStatus('All'); // default selection
 
-      Alert.alert('Success', 'Report generated successfully!');
+     // Alert.alert('Success', 'Report generated successfully!');
     } catch (err) {
       console.warn('Failed to generate report:', err);
       Alert.alert('Error', 'Failed to generate report.');
@@ -89,42 +91,46 @@ const AttendanceScreen = () => {
   };
 
   const renderItem = ({ item }: { item: AttendanceItem }) => {
-    let statusColor = '#16a34a'; // green for Present
-    if (item.isOffDay) statusColor = '#64748b'; // grey
-    else if (item.workStatus.toLowerCase() === 'late')
-      statusColor = '#f97316'; // orange
-    else if (item.workStatus.toLowerCase() === 'absent')
-      statusColor = '#ef4444'; // red
+  let statusColor = '#16a34a'; // green
+  if (item.isOffDay) statusColor = '#64748b';
+  else if (item.workStatus.toLowerCase() === 'late') statusColor = '#f97316';
+  else if (item.workStatus.toLowerCase() === 'absent') statusColor = '#ef4444';
 
-    return (
-      <View style={styles.rowCard}>
-        <View style={styles.rowLeft}>
-          <Text style={styles.rowDate}>{item.workDate}</Text>
-          <Text style={styles.rowWeek}>{item.weekDay}</Text>
-        </View>
+  return (
+    <View style={styles.rowCard}>
+      {/* Line 1: Date | Status | Worked */}
+      <View style={styles.rowTop}>
+        <Text style={styles.rowDate}>{item.workDate}</Text>
 
-        <View style={styles.rowCenter}>
-          <Chip style={[styles.statusChip, { backgroundColor: statusColor }]}>
-            {item.workStatus}
-          </Chip>
-          {item.lateIn && (
-            <Text style={styles.lateText}>Late: {item.lateIn} min</Text>
-          )}
-        </View>
+        <Chip style={[styles.statusChip, { backgroundColor: statusColor }]}>
+          {item.workStatus}
+        </Chip>
 
-        <View style={styles.rowRight}>
-          <Text style={styles.rowText}>Worked: {item.workedMinutes} min</Text>
-          {/* <Text style={styles.rowText}>OT: {item.overTime} min</Text> */}
-          {item.leaveType && (
-            <Text style={styles.rowText}>Leave: {item.leaveType}</Text>
-          )}
-          {item.holidayName && (
-            <Text style={styles.rowText}>Holiday: {item.holidayName}</Text>
-          )}
-        </View>
+        <Text style={styles.rowText}>Worked: {item.workedMinutes} min</Text>
       </View>
-    );
-  };
+
+      {/* Line 2: Day Shift IN/OUT centered */}
+     <View style={styles.rowBottom}>
+  {/* Day Shift */}
+  {item.actualMorningIn && item.actualMorningOut && (
+    <Text style={styles.shiftText}>
+      Day IN: {item.actualMorningIn} - Day OUT: {item.actualMorningOut}
+    </Text>
+  )}
+
+  {/* Night Shift (show only if both IN and OUT exist) */}
+  {item.actualNightIn && item.actualNightOut && (
+    <Text style={styles.shiftText}>
+      Night IN: {item.actualNightIn} - Night OUT: {item.actualNightOut}
+    </Text>
+  )}
+</View>
+    </View>
+  );
+};
+      
+  // FlatList usage
+ 
 
   return (
     <View style={styles.container}>
@@ -137,7 +143,7 @@ const AttendanceScreen = () => {
                   item.workStatus.toLowerCase() === filterStatus.toLowerCase(),
               )
         }
-        keyExtractor={item => item.workDate}
+          keyExtractor={(item, index) => `${item.workDate}-${index}`} // unique key
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 50, paddingHorizontal: 20 }}
         ListHeaderComponent={
@@ -263,79 +269,52 @@ const AttendanceScreen = () => {
 export default AttendanceScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#e0f2fe' },
-  card: {
-    backgroundColor: '#ffffff',
-    padding: 24,
-    borderRadius: 20,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    marginTop: 10,
-    shadowRadius: 12,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 24,
-    textAlign: 'center',
-    color: '#1e293b',
-  },
-  input: {
-    marginBottom: 20,
-    backgroundColor: '#f8fafc',
-    borderRadius: 10,
-    fontSize: 16,
-  },
-  button: {
-    marginTop: 10,
-    borderRadius: 5,
-    paddingVertical: 2,
-    backgroundColor: '#010611',
-    shadowColor: '#010611',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-  },
-  infoCard: {
-    backgroundColor: '#ffffff',
-    padding: 16,
-    borderRadius: 12,
-    marginVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 4,
+
+container: { flex: 1, backgroundColor: '#e0f2fe' }, card: { backgroundColor: '#ffffff', padding: 24, borderRadius: 20, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.1, marginTop: 10, shadowRadius: 12, marginBottom: 20, },
+  infoCard: { backgroundColor: '#ffffff', padding: 16, borderRadius: 12, marginVertical: 10, alignItems: 'center', justifyContent: 'center',
+     elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, 
+     shadowOpacity: 0.1, shadowRadius: 4, }, infoTitle: 
+     { fontWeight: '700', fontSize: 16, marginBottom: 4, color: '#1e293b', },
+      
+  rowCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 12,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
   },
-  infoTitle: {
-    fontWeight: '700',
-    fontSize: 16,
-    marginBottom: 4,
-    color: '#1e293b',
-  },
-  rowCard: {
+title: { fontSize: 22, fontWeight: 'bold', marginBottom: 24, textAlign: 'center', color: '#1e293b', }, input: { marginBottom: 20, backgroundColor: '#f8fafc', borderRadius: 10, fontSize: 16, }, button: { marginTop: 10, borderRadius: 5, paddingVertical: 2, backgroundColor: '#010611', shadowColor: '#010611', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, },
+  // Line 1
+  rowTop: {
     flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 12,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  rowLeft: { flex: 1 },
-  rowCenter: { flex: 1, alignItems: 'center' },
-  rowRight: { flex: 1, alignItems: 'flex-end' },
   rowDate: { fontSize: 16, fontWeight: '700', color: '#1e293b' },
-  rowWeek: { fontSize: 14, color: '#64748b' },
-  statusChip: { height: 28, justifyContent: 'center' },
-  lateText: { fontSize: 12, color: '#f97316', marginTop: 4 },
-  rowText: { fontSize: 14, color: '#334155', marginTop: 4 },
+  statusChip: {
+    height: 28,
+    justifyContent: 'center',
+    borderRadius: 16,
+    paddingHorizontal: 10,
+  },
+  rowText: { fontSize: 14, color: '#334155' },
+
+  // Line 2: centered Day Shift
+  rowBottom: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shiftText: {
+    fontSize: 13,
+    color: '#334155',
+    backgroundColor: '#f1f5f9',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+  },
 });

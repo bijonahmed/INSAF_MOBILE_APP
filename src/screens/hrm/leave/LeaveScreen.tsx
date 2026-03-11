@@ -138,7 +138,7 @@ const LeaveScreen = () => {
 </View>
 
       {/* Leave Balance */}
-      <View style={styles.marginTop20}>
+      <View style={styles.card}>
         {/* <Text style={styles.title}>Leave Balance</Text> */}
         {loading ? (
           <ActivityIndicator size="large" color="#3b82f6" />
