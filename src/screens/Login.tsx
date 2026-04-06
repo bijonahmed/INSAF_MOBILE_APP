@@ -38,7 +38,6 @@ const Login = (): React.ReactElement => {
     setAlertMessage(message);
     setAlertVisible(true);
   };
-
   const handleLogin = async () => {
     if (!username.trim() || !userpassword.trim()) {
       showAlert('Username and Password are required');
@@ -48,34 +47,42 @@ const Login = (): React.ReactElement => {
     try {
       setLoading(true);
 
-      const data =
-        await post(API_ENDPOINTS.LOGIN, {
+      const res = await post(
+        API_ENDPOINTS.LOGIN,
+        {
           username: username.trim(),
-          userpassword: userpassword.trim(),
-        },{} as any);
+          password: userpassword.trim(),
+        },
+        {} as any
+      );
 
-      if (data?.data?.token) {
-      
-        await saveToken(data.data.token);
-        if (data.data.user) {
+      //console.log('LOGIN RESPONSE:', res);
+      if (res?.success && res?.data?.token) {
+        await saveToken(res.data.token);
+        if (res.data.user) {
           await AsyncStorage.setItem(
             'user_info',
-            JSON.stringify(data.data.user),
+            JSON.stringify(res.data.user)
           );
         }
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Dashboard' as never }],
+        });
 
-        navigation.replace('Dashboard');
         return;
       }
 
-      showAlert(data?.message || 'Invalid username or password');
+      showAlert(res?.message || 'Invalid username or password');
+
     } catch (err: any) {
+      console.log('LOGIN ERROR:', err);
       showAlert(err.message || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <KeyboardAvoidingView
       // eslint-disable-next-line react-native/no-inline-styles

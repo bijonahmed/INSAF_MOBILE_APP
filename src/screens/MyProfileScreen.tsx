@@ -4,7 +4,7 @@ import { Text, Card, Button, SegmentedButtons } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import profile_pic from '../../assets/img/profile_pic.png';
 
-import { put, getUserInfo,putJSON } from '../config/apiHelper';
+import { put, getUserInfo, post } from '../config/apiHelper';
 import { API_ENDPOINTS } from '../config/apiRoutes';
 
 interface UserInfo {
@@ -32,6 +32,7 @@ const MyProfileScreen = () => {
         const userStr = await AsyncStorage.getItem('user_info');
         if (userStr) {
           const parsedUser = JSON.parse(userStr);
+          console.log('Loaded user from storage:', parsedUser);
           setUser(parsedUser);
         }
       } catch (err) {
@@ -55,10 +56,11 @@ const MyProfileScreen = () => {
   try {
     const body = {
      id: user.id,
-      //username: user.username,
+      username: user.username,
+      name: user.firstName + ' ' + user.lastName,
       email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      firstname: user.firstName,
+      lastname: user.lastName,
       employeeId: employeeId,
       //isactive: true,
     };
@@ -66,7 +68,7 @@ const MyProfileScreen = () => {
     console.log("Profile Update Body:", body);
    // return false; 
 
-    const res = await put(API_ENDPOINTS.HRM.UpdateSecUser, body);
+    const res = await post(API_ENDPOINTS.HRM.UpdateSecUser, body, {} as any);
 
     console.log("API Response:", res);
 
@@ -110,10 +112,10 @@ const handlePasswordSubmit = async () => {
     const url = `${API_ENDPOINTS.HRM.ResetPassSecUser}/${user?.id}`;
 
     const body = {
-      id: user?.id,
-      Username: user?.username,
-      passwordHash: password,
-    };
+  id: user?.id,
+  password: password,
+  password_confirmation: confirmPassword,
+};
 
     console.log('Calling URL:', url);
     console.log('Body:', body);
