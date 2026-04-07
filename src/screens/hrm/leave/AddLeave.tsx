@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import { get, post, put } from '../../../config/apiHelper';
+import { get, getUserInfo, post, put } from '../../../config/apiHelper';
 import { API_ENDPOINTS } from '../../../config/apiRoutes';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -35,7 +35,6 @@ type LeaveScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Leave'
 >;
-
 const AddLeaveScreen = () => {
   const [employees, setEmployees] = useState<any[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<any[]>([]);
@@ -51,20 +50,21 @@ const AddLeaveScreen = () => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<UserInfo | null>(null);
   const navigation = useNavigation<LeaveScreenNavigationProp>();
-
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
         setLoading(true);
-        const res = await get(API_ENDPOINTS.EMPLOYMENT.GET_EMPLOYEE_LIST);
+        const userInfo = await getUserInfo();
+        const empid = userInfo?.employeeId;
+        const url = `${API_ENDPOINTS.EMPLOYMENT.GET_EMPLOYEE_LIST}?empid=${empid}`;
+        const res = await get(url);
         if (res?.data && Array.isArray(res.data)) {
           setEmployees(res.data);
         }
-
         const deptRes = await get(API_ENDPOINTS.HRM.GET_HR_LEAVE_TYPES);
         setLeaveTypes(deptRes.data);
-
         const userStr = await AsyncStorage.getItem('user_info');
+        //console.log('User Info from Storage:', userStr);
         if (userStr) {
           const parsedUser = JSON.parse(userStr);
           setUser(parsedUser);
@@ -80,32 +80,44 @@ const AddLeaveScreen = () => {
   }, []);
 
   const handleSubmit = async () => {
+    console.log('Submitting leave...');
+
     if (!fromDate || !toDate || !leaveClass || !reason) {
       Alert.alert('Validation', 'Please fill all required fields.');
       return;
     }
 
-    const body = {
-      Id: 0,
-      EmployeeId: user?.id,
-      FromDate: fromDate.toISOString().split('T')[0],
-      ToDate: toDate.toISOString().split('T')[0],
-      LeaveTypeID: leaveClass,
-      Reason: reason,
-      leaveAddress: leaveAddress,
-      replacementId: replacementEmployee?.employeeid || null,
-    };
-
-    console.log('Checked body:', body);
-
     try {
-      const res = await put(API_ENDPOINTS.HRM.SAVE_LEAVE_APPLICATION, body);
+      const userInfo = await getUserInfo();
+      const empid = userInfo?.employeeId;
 
-      console.log('Full Response:', res);
+      if (!empid) {
+        Alert.alert('Error', 'Employee ID not found');
+        return;
+      }
 
-      if (res?.success) {
+      const body = {
+        Id: 0,
+        EmployeeId: empid,
+        FromDate: fromDate.toISOString().split('T')[0],
+        ToDate: toDate.toISOString().split('T')[0],
+        LeaveTypeID: Number(leaveClass),
+        Reason: reason,
+        leaveAddress: leaveAddress,
+        replacementId: replacementEmployee?.employeeid || null,
+      };
+
+      console.log('Sending body:', body);
+
+      const res = await post(API_ENDPOINTS.HRM.SAVE_LEAVE_APPLICATION, body as any, {} as any);
+
+      console.log('API Response FULL:', JSON.stringify(res, null, 2));
+
+      // ✅ SAFEST CHECK
+      if (res && (res.success === true || res.message || res.data)) {
         Alert.alert('Success', res?.message || 'Leave submitted successfully!');
 
+        // reset form
         setFromDate(null);
         setToDate(null);
         setLeaveClass('');
@@ -113,18 +125,20 @@ const AddLeaveScreen = () => {
         setLeaveAddress('');
         setReplacementEmployee(null);
 
-        navigation.navigate('LeaveHistory');
+        // 🔥 FORCE navigation after slight delay
+        setTimeout(() => {
+          navigation.replace('LeaveHistory'); // ✅ better than navigate
+        }, 300);
       } else {
         Alert.alert('Error', res?.message || 'Failed to submit leave.');
       }
     } catch (error: any) {
-      console.log('Leave request error:', error);
+      console.log('Error FULL:', error?.response || error);
 
-      const apiMessage =
-        error?.response?.data?.message ||
-        'An error occurred while submitting leave.';
-
-      Alert.alert('Error', apiMessage);
+      Alert.alert(
+        'Error',
+        error?.response?.data?.message || 'Something went wrong'
+      );
     }
   };
 
@@ -134,26 +148,6 @@ const AddLeaveScreen = () => {
       contentContainerStyle={{ paddingBottom: 50 }}
     >
       <View style={styles.card}>
-        {/* Employee Selection 
-        <Text style={styles.label}>Employee *</Text>
-        <Picker
-          selectedValue={selectedEmployee?.id || ''}
-          onValueChange={val => {
-            const emp = employees.find(e => e.employeeid === val);
-            setSelectedEmployee(emp || null);
-          }}
-          style={styles.picker}
-        >
-          <Picker.Item label="Select Employee" value="" />
-          {employees.map(emp => (
-            <Picker.Item
-              key={emp.employeeid}
-              label={emp.employeename}
-              value={emp.employeeid}
-            />
-          ))}
-        </Picker>*/}
-
         {/* From Date */}
         <Text style={styles.label}>From Date *</Text>
         <TouchableOpacity onPress={() => setShowFromPicker(true)}>
@@ -175,7 +169,6 @@ const AddLeaveScreen = () => {
             }}
           />
         )}
-
         {/* To Date */}
         <Text style={styles.label}>To Date *</Text>
         <TouchableOpacity onPress={() => setShowToPicker(true)}>
@@ -197,7 +190,6 @@ const AddLeaveScreen = () => {
             }}
           />
         )}
-
         {/* Leave Class */}
         <Text style={styles.label}>Leave Class *</Text>
         <Picker
@@ -207,10 +199,9 @@ const AddLeaveScreen = () => {
         >
           <Picker.Item label="Select Leave Class" value="" />
           {leaveTypes.map(item => (
-            <Picker.Item key={item.id} label={item.name} value={item.id} />
+            <Picker.Item key={item.id} label={item.leavetype} value={item.id} />
           ))}
         </Picker>
-
         {/* Replacement Employee */}
         <Text style={styles.label}>Replacement Employee</Text>
         <Picker
@@ -230,7 +221,6 @@ const AddLeaveScreen = () => {
             />
           ))}
         </Picker>
-
         {/* Reason */}
         <Text style={styles.label}>Leave Reason *</Text>
         <RNTextInput
@@ -241,7 +231,6 @@ const AddLeaveScreen = () => {
           value={reason}
           onChangeText={setReason}
         />
-
         {/* Address */}
         <Text style={styles.label}>Leave Address</Text>
         <RNTextInput
@@ -252,7 +241,6 @@ const AddLeaveScreen = () => {
           value={leaveAddress}
           onChangeText={setLeaveAddress}
         />
-
         {/* Buttons */}
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
@@ -277,17 +265,25 @@ const AddLeaveScreen = () => {
     </ScrollView>
   );
 };
-
 export default AddLeaveScreen;
-
 const styles = StyleSheet.create({
- container: {
-  flex: 1,
-  backgroundColor: '#f8fafc',
-  paddingHorizontal: 16,
-  paddingTop: 20,
-},
- 
+  container: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+    paddingHorizontal: 16,
+    paddingTop: 20,
+  },
+  card: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    marginBottom: 16,
+  },
   label: { fontWeight: '600', marginBottom: 6, color: '#374151', fontSize: 14 },
   input: {
     borderWidth: 1,
@@ -333,7 +329,6 @@ const styles = StyleSheet.create({
   },
   resetText: { color: '#374151', fontWeight: 'bold', fontSize: 16 },
 });
-
 function alert(arg0: string) {
   throw new Error('Function not implemented.');
 }

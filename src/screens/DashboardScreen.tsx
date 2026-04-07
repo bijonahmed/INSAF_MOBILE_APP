@@ -15,9 +15,7 @@ import { RootStackParamList } from '../navigation/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { getUserInfo } from '../config/apiHelper';
-
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Dashboard'>;
-
 // ================= SVG ICONS (define OUTSIDE parent) =================
 const LogoutIcon = ({ size = 24, color = 'red' }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -44,7 +42,6 @@ const LogoutIcon = ({ size = 24, color = 'red' }) => (
     />
   </Svg>
 );
-
 const NotificationIcon = ({ size = 24, color = '#0f172a' }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Path
@@ -64,26 +61,22 @@ const NotificationIcon = ({ size = 24, color = '#0f172a' }) => (
     <Circle cx="18" cy="6" r="3" fill="red" />
   </Svg>
 );
-
 // ================= MAIN COMPONENT =================
 const DashboardScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [time, setTime] = useState(new Date());
   const [showNotifications, setShowNotifications] = useState(false);
   const [username, setUsername] = useState<string>('');
-
   const notifications = [
     { id: '1', title: 'New Employee Added' },
     { id: '2', title: 'Roster Updated' },
     { id: '3', title: 'Report Ready' },
   ];
-
   // ================= CLOCK =================
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
   const formatTime = (date: Date) => date.toLocaleTimeString('en-GB');
   const formatDate = (date: Date) =>
     date.toLocaleDateString('en-GB', {
@@ -92,28 +85,25 @@ const DashboardScreen = () => {
       month: 'short',
       year: 'numeric',
     });
-
   const getGreeting = () => {
     const hour = time.getHours();
     if (hour < 12) return 'Good Morning';
     if (hour < 18) return 'Good Afternoon';
     return 'Good Evening';
   };
-
   // ================= LOAD USER =================
-useEffect(() => {
-  const loadUser = async () => {
-    const user = await getUserInfo();
-    if (user) {
-      setUsername(user.username || user.firstName || '');
-    } else {
-      // Optional: navigate to Login if no token/user
-      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-    }
-  };
-  loadUser();
-}, [navigation]);
-
+  useEffect(() => {
+    const loadUser = async () => {
+      const user = await getUserInfo();
+      if (user) {
+        setUsername(user.username || user.firstName || '');
+      } else {
+        // Optional: navigate to Login if no token/user
+        navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+      }
+    };
+    loadUser();
+  }, [navigation]);
   // ================= LOGOUT =================
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -126,7 +116,6 @@ useEffect(() => {
             // Clear only login-related data
             await AsyncStorage.removeItem('access_token');
             await AsyncStorage.removeItem('user_info');
-
             // Reset navigation to Login screen
             navigation.reset({
               index: 0,
@@ -139,93 +128,80 @@ useEffect(() => {
       },
     ]);
   };
-
-   return (
-  <View style={styles.container}>
-    {/* TOP BAR */}
-    <View style={styles.topBar}>
-      <Text style={styles.title}>
-        Welcome, {username || 'User'}!
-      </Text>
-
-      <View style={styles.topBarStyle}>
-        <TouchableOpacity
-          onPress={() => setShowNotifications(true)}
-          style={styles.notificationIcon}
-        >
-          <NotificationIcon color="#0f172a" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={handleLogout}>
-          <LogoutIcon color="red" />
-        </TouchableOpacity>
-      </View>
-    </View>
-
-    {/* NOTIFICATION MODAL */}
-    <Modal visible={showNotifications} transparent animationType="fade">
-      <TouchableOpacity
-        style={styles.modalOverlay}
-        onPress={() => setShowNotifications(false)}
-      />
-      <View style={styles.modalContent}>
-        <Text>
-          Notifications
+  return (
+    <View style={styles.container}>
+      {/* TOP BAR */}
+      <View style={styles.topBar}>
+        <Text style={styles.title}>
+          Welcome, {username || 'User'}!
         </Text>
-        <FlatList
-          data={notifications}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <Text style={styles.notificationMsg}>{item.title}</Text>
-          )}
+        <View style={styles.topBarStyle}>
+          <TouchableOpacity
+            onPress={() => setShowNotifications(true)}
+            style={styles.notificationIcon}
+          >
+            <NotificationIcon color="#0f172a" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleLogout}>
+            <LogoutIcon color="red" />
+          </TouchableOpacity>
+        </View>
+      </View>
+      {/* NOTIFICATION MODAL */}
+      <Modal visible={showNotifications} transparent animationType="fade">
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          onPress={() => setShowNotifications(false)}
         />
-      </View>
-    </Modal>
-
-    {/* SCROLL CONTENT */}
-    <ScrollView contentContainerStyle={styles.content}>
-      {/* CLOCK */}
-      <View style={styles.clockCard}>
-        <Text style={styles.clockTime}>{formatTime(time)}</Text>
-        <Text style={styles.clockDate}>{formatDate(time)}</Text>
-        <Text style={styles.clockDate}>{getGreeting()}</Text>
-      </View>
-
-     {/* CARDS */}
-<View style={styles.grid}>
-  <Card style={[styles.card, styles.cardBlue]} onPress={() => navigation.navigate('Employee')}>
+        <View style={styles.modalContent}>
+          <Text>
+            Notifications
+          </Text>
+          <FlatList
+            data={notifications}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => (
+              <Text style={styles.notificationMsg}>{item.title}</Text>
+            )}
+          />
+        </View>
+      </Modal>
+      {/* SCROLL CONTENT */}
+      <ScrollView contentContainerStyle={styles.content}>
+        {/* CLOCK */}
+        <View style={styles.clockCard}>
+          <Text style={styles.clockTime}>{formatTime(time)}</Text>
+          <Text style={styles.clockDate}>{formatDate(time)}</Text>
+          <Text style={styles.clockDate}>{getGreeting()}</Text>
+        </View>
+        {/* CARDS */}
+        <View style={styles.grid}>
+          {/*<Card style={[styles.card, styles.cardBlue]} onPress={() => navigation.navigate('Employee')}>
     <Text style={styles.cardTitle}>Employees</Text>
-  </Card>
-
-  <Card style={[styles.card, styles.cardGreen]} onPress={() => navigation.navigate('Roster')}>
-    <Text style={styles.cardTitle}>Roster</Text>
-  </Card>
-
-  <Card style={[styles.card, styles.cardPurple]} onPress={() => navigation.navigate('Reports')}>
-    <Text style={styles.cardTitle}>Reports</Text>
-  </Card>
-
-  <Card style={[styles.card, styles.cardOrange]} onPress={() => navigation.navigate('Leave')}>
-    <Text style={styles.cardTitle}>Leave</Text>
-  </Card>
-
-  <Card style={[styles.card, styles.cardTeal]} onPress={() => navigation.navigate('LockScreen')}>
-    <Text style={styles.cardTitle}>Screen Lock</Text>
-  </Card>
-
-  <Card style={[styles.card, styles.cardPink]} onPress={() => navigation.navigate('MyProfile')}>
-    <Text style={styles.cardTitle}>My Profile</Text>
-  </Card>
-</View>
-    </ScrollView>
-  </View>
-);
+  </Card>*/}
+          <Card style={[styles.card, styles.cardGreen]} onPress={() => navigation.navigate('Roster')}>
+            <Text style={styles.cardTitle}>My Roster</Text>
+          </Card>
+          <Card style={[styles.card, styles.cardOrange]} onPress={() => navigation.navigate('Leave')}>
+            <Text style={styles.cardTitle}>My Leave</Text>
+          </Card>
+          <Card style={[styles.card, styles.cardPurple]} onPress={() => navigation.navigate('Reports')}>
+            <Text style={styles.cardTitle}>My Reports</Text>
+          </Card>
+          {/* <Card style={[styles.card, styles.cardTeal]} onPress={() => navigation.navigate('LockScreen')}>
+            <Text style={styles.cardTitle}>Screen Lock</Text>
+          </Card>  */}
+          <Card style={[styles.card, styles.cardPink]} onPress={() => navigation.navigate('MyProfile')}>
+            <Text style={styles.cardTitle}>My Profile</Text>
+          </Card>
+        </View>
+      </ScrollView>
+    </View>
+  );
 };
-
 export default DashboardScreen;
-
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 16 , backgroundColor: '#ffffff'},
+  container: { flex: 1, paddingHorizontal: 16, backgroundColor: '#ffffff' },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -244,7 +220,7 @@ const styles = StyleSheet.create({
   clockTime: { fontSize: 34, fontWeight: '700', color: '#38bdf8' },
   clockDate: { fontSize: 13, color: '#e5e7eb', marginTop: 4 },
   grid: {
-   flexDirection: 'row',
+    flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
@@ -263,10 +239,11 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
   },
-  cardTitle: { fontSize: 16,
+  cardTitle: {
+    fontSize: 16,
     fontWeight: '700',
     color: '#fff',
-   },
+  },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
   modalContent: {
     position: 'absolute',
@@ -278,13 +255,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     elevation: 6,
   },
-
   notificationMsg: {
     paddingVertical: 8, fontSize: 14
   },
-
-  topBarStyle:{
-     flexDirection: 'row', alignItems: 'center' 
+  topBarStyle: {
+    flexDirection: 'row', alignItems: 'center'
   },
   notificationIcon: {
     marginRight: 16

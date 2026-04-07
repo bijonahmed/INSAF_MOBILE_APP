@@ -20,6 +20,7 @@ const ReportsScreen = () => {
       color: '#2563eb',
       onPress: () => navigation.navigate('Attendance'),
     },
+    /*
     {
       title: 'Late',
       sub: 'Track late entry',
@@ -38,6 +39,7 @@ const ReportsScreen = () => {
       color: '#8b5cf6',
       onPress: () => navigation.navigate('Dashboard'),
     },
+    */
   ];
 
   return (

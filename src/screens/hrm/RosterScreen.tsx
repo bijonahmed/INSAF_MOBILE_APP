@@ -6,7 +6,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
-import { Button, Chip } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import { get, getUserInfo } from '../../config/apiHelper';
 import { API_ENDPOINTS } from '../../config/apiRoutes';
@@ -41,13 +41,11 @@ const RosterScreen = () => {
       setRosterData(res.data ?? []);
     } catch (err) {
       console.warn('Error fetching roster:', err);
-    //  alert('Failed to generate report');
     } finally {
       setLoading(false);
     }
   };
 
-  // Convert "HH:mm:ss" to "hh:mm AM/PM"
   const convertTo12Hour = (time24: string) => {
     if (!time24 || time24 === '00:00:00') return '--';
     const [hourStr, minStr] = time24.split(':');
@@ -58,25 +56,45 @@ const RosterScreen = () => {
   };
 
   const renderItem = ({ item }: { item: RosterItem }) => {
-    const bgColor = item.isoffday ? '#e0f2fe' : '#fef3c7';
     return (
-      <View style={[styles.rowCard, { backgroundColor: bgColor }]}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.dateText}>{item.dutydate}</Text>
-          <Text style={styles.weekdayText}>{item.weekday}</Text>
+      <View style={styles.rosterCard}>
+        {/* LEFT DATE */}
+        <View style={styles.dateBox}>
+          <Text style={styles.date}>{item.dutydate}</Text>
+          <Text style={styles.weekday}>{item.weekday}</Text>
         </View>
-        <View style={{ flex: 2 }}>
-          <Text style={styles.timeText}>
-            Mor.: {convertTo12Hour(item.morningin)} - {convertTo12Hour(item.morningout)}
-          </Text>
-          <Text style={styles.timeText}>
-           Night: {convertTo12Hour(item.nightin)} - {convertTo12Hour(item.nightout)}
-          </Text>
+
+        {/* MIDDLE TIME */}
+        <View style={styles.timeBox}>
+          <View style={styles.timeRow}>
+            <Text style={styles.label}>Morning</Text>
+            <Text style={styles.time}>
+              {convertTo12Hour(item.morningin)} - {convertTo12Hour(item.morningout)}
+            </Text>
+          </View>
+
+          <View style={styles.timeRow}>
+            <Text style={styles.label}>Night</Text>
+            <Text style={styles.time}>
+              {convertTo12Hour(item.nightin)} - {convertTo12Hour(item.nightout)}
+            </Text>
+          </View>
         </View>
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Chip style={[styles.statusChip, { backgroundColor: item.isoffday ? '#64748b' : '#16a34a' }]}>
-            {item.isoffday ? 'Off Day' : 'Working'}
-          </Chip>
+
+        {/* STATUS */}
+        <View style={styles.statusBox}>
+          <View
+            style={[
+              styles.statusBadge,
+              {
+                backgroundColor: item.isoffday ? '#94a3b8' : '#22c55e',
+              },
+            ]}
+          >
+            <Text style={styles.statusText}>
+              {item.isoffday ? 'Off Day' : 'Working'}
+            </Text>
+          </View>
         </View>
       </View>
     );
@@ -86,30 +104,27 @@ const RosterScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Month & Year Picker */}
-      <View style={styles.card}>
-        {/* <Text style={styles.title}>Roster Report</Text> */}
-        <Text style={styles.label}>Select Month</Text>
-        <Picker
-          selectedValue={month}
-          onValueChange={setMonth}
-          style={styles.picker}
-        >
-          {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-            <Picker.Item key={m} label={`Month ${m}`} value={m} />
-          ))}
-        </Picker>
+      {/* FILTER CARD */}
+      <View style={styles.filterCard}>
+        <Text style={styles.header}>Roster Report</Text>
 
-        <Text style={styles.label}>Select Year</Text>
-        <Picker
-          selectedValue={year}
-          onValueChange={setYear}
-          style={styles.picker}
-        >
-          {years.map(y => (
-            <Picker.Item key={y} label={`${y}`} value={y} />
-          ))}
-        </Picker>
+        <Text style={styles.labelTop}>Select Month</Text>
+        <View style={styles.pickerBox}>
+          <Picker selectedValue={month} onValueChange={setMonth}>
+            {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+              <Picker.Item key={m} label={`Month ${m}`} value={m} />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={styles.labelTop}>Select Year</Text>
+        <View style={styles.pickerBox}>
+          <Picker selectedValue={year} onValueChange={setYear}>
+            {years.map(y => (
+              <Picker.Item key={y} label={`${y}`} value={y} />
+            ))}
+          </Picker>
+        </View>
 
         <Button
           mode="contained"
@@ -117,13 +132,15 @@ const RosterScreen = () => {
           onPress={handleGenerate}
           loading={loading}
         >
-          Generate
+          Generate Report
         </Button>
       </View>
 
-      {/* Roster List */}
+      {/* LIST */}
       {loading ? (
-        <ActivityIndicator size="large" style={{ marginTop: 20 }} />
+        <ActivityIndicator size="large" style={{ marginTop: 30 }} />
+      ) : rosterData.length === 0 ? (
+        <Text style={styles.empty}>No roster found</Text>
       ) : (
         <FlatList
           data={rosterData}
@@ -139,36 +156,113 @@ const RosterScreen = () => {
 export default RosterScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#e0f2fe', paddingHorizontal: 16 },
-  card: {
-    backgroundColor: '#ffffff',
-    padding: 20,
+  container: {
+    flex: 1,
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 14,
+  },
+
+  filterCard: {
+    backgroundColor: '#fff',
+    padding: 18,
     borderRadius: 16,
     marginTop: 16,
-    elevation: 6,
+    elevation: 4,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
+
+  header: {
+    fontSize: 18,
+    fontWeight: '700',
     textAlign: 'center',
+    marginBottom: 10,
+    color: '#0f172a',
   },
-  label: { fontSize: 16, fontWeight: '600', marginTop: 10, marginBottom: 4 },
-  picker: { backgroundColor: '#f1f5f9', borderRadius: 10 },
-  button: { marginTop: 16, backgroundColor: '#010611' },
-  rowCard: {
+
+  labelTop: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 10,
+    marginBottom: 4,
+    color: '#64748b',
+  },
+
+  pickerBox: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 10,
+  },
+
+  button: {
+    marginTop: 16,
+    borderRadius: 10,
+    backgroundColor: '#0f172a',
+  },
+
+  rosterCard: {
     flexDirection: 'row',
-    padding: 16,
-    borderRadius: 16,
+    backgroundColor: '#ffffff',
+    padding: 14,
+    borderRadius: 14,
     marginBottom: 12,
     elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
   },
-  dateText: { fontSize: 16, fontWeight: '700', color: '#1e293b' },
-  weekdayText: { fontSize: 14, color: '#64748b' },
-  timeText: { fontSize: 14, color: '#334155', marginTop: 4 },
-  statusChip: { height: 28, justifyContent: 'center', paddingHorizontal: 8 },
+
+  dateBox: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+
+  date: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+
+  weekday: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+
+  timeBox: {
+    flex: 2,
+    paddingHorizontal: 10,
+  },
+
+  timeRow: {
+    marginBottom: 6,
+  },
+
+  label: {
+    fontSize: 11,
+    color: '#64748b',
+  },
+
+  time: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+
+  statusBox: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+
+  statusBadge: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+  },
+
+  statusText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+
+  empty: {
+    textAlign: 'center',
+    marginTop: 40,
+    color: '#64748b',
+  },
 });

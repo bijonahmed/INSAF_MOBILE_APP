@@ -9,26 +9,11 @@ import {
 } from 'react-native';
 import { get, getUserInfo } from '../../../config/apiHelper';
 import { API_ENDPOINTS } from '../../../config/apiRoutes';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useNavigation } from '@react-navigation/native';
-
-type RootStackParamList = {
-  Leave: undefined;
-  AddLeave: undefined;
-  LeaveHistory: undefined;
-};
-
-type LeaveScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Leave'
->;
 
 const LeaveHistoryScreen = () => {
   const [leaveHistory, setLeaveHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('All');
-
-  //const navigation = useNavigation<LeaveScreenNavigationProp>();
 
   useEffect(() => {
     fetchLeaveHistory();
@@ -38,110 +23,109 @@ const LeaveHistoryScreen = () => {
     try {
       setLoading(true);
       const userInfo = await getUserInfo();
-      const userId = userInfo?.id;
+      const empid = userInfo?.employeeId;
       const yearValue = new Date().getFullYear();
 
-      const url = `${API_ENDPOINTS.HRM.GetEmpLeaveInfo}?empid=${userId}&year=${yearValue}`;
-
+      const url = `${API_ENDPOINTS.HRM.GetEmpLeaveInfo}?empid=${empid}&year=${yearValue}`;
       const res = await get(url);
+
       setLeaveHistory(res?.data?.applications || []);
-      setLoading(false);
     } catch (error) {
       console.log('Leave History Error:', error);
+    } finally {
       setLoading(false);
     }
   };
 
-  // const handleLeaveRequest = () => {
-  //   navigation.navigate('AddLeave');
-  // };
-
-  const getStatusColor = (status: string) => {
-    if (status === 'Accepted' || status === 'Approved') return '#16a34a';
-    if (status === 'Rejected' || status === 'Cancel') return '#dc2626';
-    return '#f59e0b'; // Pending
+  // ✅ Status Mapping
+  const getStatusInfo = (status: number) => {
+    switch (status) {
+      case 0:
+        return { label: 'Pending', color: '#f59e0b' };
+      case 1:
+        return { label: 'Approved', color: '#22c55e' };
+      case 2:
+        return { label: 'Rejected', color: '#ef4444' };
+      default:
+        return { label: 'Unknown', color: '#64748b' };
+    }
   };
 
+  // ✅ Filter Logic
   const filteredData =
     statusFilter === 'All'
       ? leaveHistory
-      : leaveHistory.filter(
-          item =>
-            item.leavestatus?.toLowerCase() === statusFilter.toLowerCase()
-        );
+      : leaveHistory.filter(item => {
+          const statusLabel = getStatusInfo(item.LeaveStatusId).label;
+          return statusLabel === statusFilter;
+        });
 
-  const renderItem = ({ item }: { item: any }) => (
-    <View style={styles.card}>
-      <Text style={styles.leaveType}>{item.leavetype}</Text>
+  const renderItem = ({ item }: { item: any }) => {
+    const status = getStatusInfo(item.LeaveStatusId);
 
-      <View style={styles.row}>
-        <Text style={styles.label}>From</Text>
-        <Text style={styles.value}>{item.fromdate}</Text>
+    return (
+      <View style={styles.card}>
+        {/* HEADER */}
+        <View style={styles.headerRow}>
+          <Text style={styles.leaveType}>{item.leavetype}</Text>
+
+          <View style={[styles.statusBadge, { backgroundColor: status.color }]}>
+            <Text style={styles.statusText}>{status.label}</Text>
+          </View>
+        </View>
+
+        {/* BODY */}
+
+         <View style={styles.row}>
+          <Text style={styles.label}>Apply Date</Text>
+          <Text style={styles.value}>{item.applicationdate}</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>From</Text>
+          <Text style={styles.value}>{item.fromdate}</Text>
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>To</Text>
+          <Text style={styles.value}>{item.todate}</Text>
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Reason</Text>
+          <Text style={styles.value}>{item.reason}</Text>
+        </View>
       </View>
+    );
+  };
 
-      <View style={styles.row}>
-        <Text style={styles.label}>To</Text>
-        <Text style={styles.value}>{item.todate}</Text>
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Reason</Text>
-        <Text style={styles.value}>{item.reason}</Text>
-      </View>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Status</Text>
-        <Text
-          style={[
-            styles.status,
-            { color: getStatusColor(item.leavestatus) },
-          ]}
-        >
-          {item.leavestatus}
-        </Text>
-      </View>
-    </View>
-  );
-
-  // eslint-disable-next-line react/no-unstable-nested-components
   const ListHeader = () => (
-    <>
-      {/* Top Buttons */}
-      {/* <View style={styles.topButtonContainer}>
-        <TouchableOpacity style={styles.topButton} onPress={handleLeaveRequest}>
-          <Text style={styles.topButtonText}>Leave Request</Text>
-        </TouchableOpacity>
-      </View> */}
-
-      {/* Status Filter */}
-      <View style={styles.filterContainer}>
-        {['All', 'Pending', 'Approved', 'Cancel'].map(status => (
-          <TouchableOpacity
-            key={status}
+    <View style={styles.filterContainer}>
+      {['All', 'Pending', 'Approved', 'Rejected'].map(status => (
+        <TouchableOpacity
+          key={status}
+          style={[
+            styles.filterButton,
+            statusFilter === status && styles.activeFilter,
+          ]}
+          onPress={() => setStatusFilter(status)}
+        >
+          <Text
             style={[
-              styles.filterButton,
-              statusFilter === status && styles.activeFilter,
+              styles.filterText,
+              statusFilter === status && styles.activeFilterText,
             ]}
-            onPress={() => setStatusFilter(status)}
           >
-            <Text
-              style={[
-                styles.filterText,
-                statusFilter === status && styles.activeFilterText,
-              ]}
-            >
-              {status}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </>
+            {status}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
   );
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color="#020c1b" />
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#0f172a" />
       </View>
     );
   }
@@ -149,10 +133,10 @@ const LeaveHistoryScreen = () => {
   return (
     <FlatList
       data={filteredData}
-      keyExtractor={item => item.id.toString()}
+      keyExtractor={(item, index) => index.toString()}
       renderItem={renderItem}
       ListHeaderComponent={ListHeader}
-      contentContainerStyle={{ paddingBottom: 30 }}
+      contentContainerStyle={{ paddingBottom: 40 }}
       ListEmptyComponent={
         <Text style={styles.noDataText}>No Leave Applications Found</Text>
       }
@@ -163,41 +147,17 @@ const LeaveHistoryScreen = () => {
 export default LeaveHistoryScreen;
 
 const styles = StyleSheet.create({
-  container: {
+  loader: {
     flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-
-  topButtonContainer: {
-    flexDirection: 'row',
-    marginTop: 20,
-    marginHorizontal: 16,
-    gap: 10,
-  },
-
-  topButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#010611',
-    paddingVertical: 12,
-    borderRadius: 10,
-    elevation: 2,
-  },
-
-  topButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 15,
+    alignItems: 'center',
   },
 
   filterContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 15,
+    marginTop: 16,
     marginHorizontal: 16,
-    gap: 8,
   },
 
   filterButton: {
@@ -216,8 +176,8 @@ const styles = StyleSheet.create({
   },
 
   activeFilter: {
-    backgroundColor: '#2563eb',
-    borderColor: '#2563eb',
+    backgroundColor: '#0f172a',
+    borderColor: '#0f172a',
   },
 
   activeFilterText: {
@@ -230,41 +190,49 @@ const styles = StyleSheet.create({
     marginTop: 14,
     borderRadius: 14,
     padding: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
+    marginBottom: 15,
     elevation: 3,
   },
 
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+
   leaveType: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
-    marginBottom: 12,
     color: '#0f172a',
+  },
+
+  statusBadge: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+  },
+
+  statusText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
   },
 
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 6,
   },
 
   label: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#64748b',
   },
 
   value: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#1e293b',
     fontWeight: '500',
-  },
-
-  status: {
-    fontWeight: '600',
   },
 
   noDataText: {

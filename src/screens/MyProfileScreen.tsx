@@ -3,10 +3,8 @@ import { View, StyleSheet, Image, ScrollView, TextInput, Alert } from 'react-nat
 import { Text, Card, Button, SegmentedButtons } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import profile_pic from '../../assets/img/profile_pic.png';
-
 import { put, getUserInfo, post } from '../config/apiHelper';
 import { API_ENDPOINTS } from '../config/apiRoutes';
-
 interface UserInfo {
   id: number;
   username: string;
@@ -19,13 +17,11 @@ interface UserInfo {
   password?: string;
   passwordHash?: string;
 }
-
 const MyProfileScreen = () => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [tab, setTab] = useState<'profile' | 'password'>('profile');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -41,104 +37,81 @@ const MyProfileScreen = () => {
     };
     loadUser();
   }, []);
-
   if (!user) return null;
-
- const handleProfileSubmit = async () => {
-  if (!user?.username.trim() || !user.firstName.trim() || !user.lastName.trim()) {
-    Alert.alert('Validation Error', 'All fields are required');
-    return;
-  }
-
-      const userInfo = await getUserInfo();
-      const employeeId = userInfo?.employeeId;
-
-  try {
-    const body = {
-     id: user.id,
-      username: user.username,
-      name: user.firstName + ' ' + user.lastName,
-      email: user.email,
-      firstname: user.firstName,
-      lastname: user.lastName,
-      employeeId: employeeId,
-      //isactive: true,
-    };
-
-    console.log("Profile Update Body:", body);
-   // return false; 
-
-    const res = await post(API_ENDPOINTS.HRM.UpdateSecUser, body, {} as any);
-
-    console.log("API Response:", res);
-
-    if (res?.success) {
-      await AsyncStorage.setItem('user_info', JSON.stringify(user));
-      Alert.alert('Success', res?.message || 'Profile updated successfully!');
-    } else {
-      Alert.alert('Error', res?.message || 'Failed to update profile');
+  const handleProfileSubmit = async () => {
+    if (!user?.username.trim() || !user.firstName.trim() || !user.lastName.trim()) {
+      Alert.alert('Validation Error', 'All fields are required');
+      return;
     }
-
-  } catch (error: any) {
-    console.log("Profile Update Error:", error);
-
-    const apiMessage =
-      error?.response?.data?.message ||
-      'An error occurred while updating profile';
-
-    Alert.alert('Error', apiMessage);
-  }
-};
-
-  
-
-const handlePasswordSubmit = async () => {
-  if (!password || !confirmPassword) {
-    Alert.alert('Validation Error', 'Please fill both password fields');
-    return;
-  }
-
-  if (password.length < 2) {
-    Alert.alert('Validation Error', 'Password must be at least 2 characters');
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    Alert.alert('Validation Error', 'Passwords do not match');
-    return;
-  }
-
-  try {
-    const url = `${API_ENDPOINTS.HRM.ResetPassSecUser}/${user?.id}`;
-
-    const body = {
-  id: user?.id,
-  password: password,
-  password_confirmation: confirmPassword,
-};
-
-    console.log('Calling URL:', url);
-    console.log('Body:', body);
-
-    const res = await put(url, body);
-
-    console.log('Backend Response:', res);
-
-    if (res?.success) {
-      const updatedUser = { ...user, password };
-      await AsyncStorage.setItem('user_info', JSON.stringify(updatedUser));
-      Alert.alert('Success', res.message || 'Password updated successfully!');
-      setPassword('');
-      setConfirmPassword('');
-    } else {
-      Alert.alert('Error', res?.message || 'Failed to update password');
+    const userInfo = await getUserInfo();
+    const employeeId = userInfo?.employeeId;
+    try {
+      const body = {
+        id: user.id,
+        username: user.username,
+        name: user.firstName + ' ' + user.lastName,
+        email: user.email,
+        firstname: user.firstName,
+        lastname: user.lastName,
+        employeeId: employeeId,
+        //isactive: true,
+      };
+      console.log("Profile Update Body:", body);
+      // return false; 
+      const res = await post(API_ENDPOINTS.HRM.UpdateSecUser, body, {} as any);
+      console.log("API Response:", res);
+      if (res?.success) {
+        await AsyncStorage.setItem('user_info', JSON.stringify(user));
+        Alert.alert('Success', res?.message || 'Profile updated successfully!');
+      } else {
+        Alert.alert('Error', res?.message || 'Failed to update profile');
+      }
+    } catch (error: any) {
+      console.log("Profile Update Error:", error);
+      const apiMessage =
+        error?.response?.data?.message ||
+        'An error occurred while updating profile';
+      Alert.alert('Error', apiMessage);
     }
-  } catch (err) {
-    console.error('Password Update Error:', err);
-    Alert.alert('Error', 'Failed to update password');
-  }
-};
-
+  };
+  const handlePasswordSubmit = async () => {
+    if (!password || !confirmPassword) {
+      Alert.alert('Validation Error', 'Please fill both password fields');
+      return;
+    }
+    if (password.length < 2) {
+      Alert.alert('Validation Error', 'Password must be at least 2 characters');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Validation Error', 'Passwords do not match');
+      return;
+    }
+    try {
+      const url = `${API_ENDPOINTS.HRM.ResetPassSecUser}/${user?.id}`;
+      const body = {
+        id: user?.id,
+        password: password,
+        password_confirmation: confirmPassword,
+      };
+      console.log('Calling URL:', url);
+      console.log('Body:', body);
+      const res = await put(url, body);
+      console.log('Backend Response:', res);
+      if (res?.success) {
+        const updatedUser = { ...user, password };
+        await AsyncStorage.setItem('user_info', JSON.stringify(updatedUser));
+        Alert.alert('Success', res.message || 'Password updated successfully!');
+        setPassword('');
+        setConfirmPassword('');
+      } else {
+        Alert.alert('Error', res?.message || 'Failed to update password');
+      }
+    } catch (err) {
+      console.error('Password Update Error:', err);
+      Alert.alert('Error', 'Failed to update password');
+    }
+  };
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <SegmentedButtons
@@ -150,7 +123,6 @@ const handlePasswordSubmit = async () => {
         ]}
         style={{ marginBottom: 16 }}
       />
-
       <Card style={styles.card}>
         {tab === 'profile' && (
           <View>
@@ -163,12 +135,11 @@ const handlePasswordSubmit = async () => {
                 <Text style={styles.email}>{user.email || 'N/A'}</Text>
               </View>
             </View>
-
             {/* Editable Info */}
             <View style={styles.infoSection}>
               <TextInput
                 placeholder="Username"
-               editable={false}
+                editable={false}
                 value={user.username}
                 onChangeText={(text) => setUser({ ...user, username: text })}
                 style={styles.input}
@@ -198,13 +169,11 @@ const handlePasswordSubmit = async () => {
                 editable={false}
               />
             </View>
-
             <Button mode="contained" onPress={handleProfileSubmit} style={styles.button}>
               Update Profile
             </Button>
           </View>
         )}
-
         {tab === 'password' && (
           <View style={styles.infoSection}>
             <TextInput
@@ -230,9 +199,7 @@ const handlePasswordSubmit = async () => {
     </ScrollView>
   );
 };
-
 export default MyProfileScreen;
-
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
