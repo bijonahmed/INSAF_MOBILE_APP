@@ -5,7 +5,8 @@ import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/Login';
 import DashboardScreen from '../screens/DashboardScreen';
 import EmployeeScreen from '../screens/hrm/EmployeeScreen';
-import RosterScreen from '../screens/hrm/RosterScreen';
+import MonthlyRosterScreen from '../screens/hrm/MonthlyRosterScreen';
+import WeeklyRosterScreen from '../screens/hrm/WeeklyRosterScreen';
 import ReportsScreen from '../screens/hrm/ReportsScreen';
 import LockScreen from '../screens/hrm/LockScreen';
 import MyProfileScreen from '../screens/MyProfileScreen';
@@ -42,11 +43,12 @@ export default function AppNavigator() {
 
       {/* HRM Screens */}
       <Stack.Screen name="Employee" component={EmployeeScreen} />
-      <Stack.Screen name="Roster" component={RosterScreen} />
+      <Stack.Screen name="MonthlyRoster" component={MonthlyRosterScreen} options={{ title: "Monthly Roster" }} />
+      <Stack.Screen name="WeeklyRoster" component={WeeklyRosterScreen} options={{ title: "Weekly Roster" }} />
       <Stack.Screen name="Leave" component={LeaveScreen} />
       <Stack.Screen name="Reports" component={ReportsScreen} />
       <Stack.Screen name="LockScreen" component={LockScreen} />
-      <Stack.Screen name="MyProfile" component={MyProfileScreen} options={{ title: "My Profile" }}/>
+      <Stack.Screen name="MyProfile" component={MyProfileScreen} options={{ title: "My Profile" }} />
       <Stack.Screen name="Attendance" component={AttendanceScreen} />
       <Stack.Screen name="AddLeave" component={AddLeave} options={{ title: "Add Leave" }} />
       <Stack.Screen name="LeaveHistory" component={LeaveHistory} options={{ title: "Leave History" }} />

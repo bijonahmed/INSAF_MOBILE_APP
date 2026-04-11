@@ -247,13 +247,13 @@ const MyProfileScreen = () => {
                     <Text style={styles.detailValue}>No Photo</Text>
                   )}
                 </View>
-                <DetailRow label="Employee ID" value={empData.empGeneralDto?.employeeid} />
-                <DetailRow label="Employee Code" value={empData.empGeneralDto?.employeecode} />
+                {/* <DetailRow label="Employee Code" value={empData.empGeneralDto?.employeeid} /> */}
+                <DetailRow label="Employee ID" value={empData.empGeneralDto?.employeecode} />
                 <DetailRow label="Employee Name" value={empData.empGeneralDto?.employeename} />
-                <DetailRow label="Full Name" value={empData.empGeneralDto?.fullname} />
+                {/* <DetailRow label="Full Name" value={empData.empGeneralDto?.fullname} /> */}
                 <DetailRow label="Mobile Phone" value={empData.empGeneralDto?.mobilephone} />
                 <DetailRow label="Work Phone" value={empData.empGeneralDto?.workphone} />
-                <DetailRow label="Is Active" value={empData.empGeneralDto?.isactive ? 'Yes' : 'No'} />
+                {/* <DetailRow label="Is Active" value={empData.empGeneralDto?.isactive ? 'Yes' : 'No'} /> */}
                 {/* <DetailRow label="Photo" value={empData.empGeneralDto?.photo} /> */}
 
                 {/* Personal Info */}
@@ -275,9 +275,9 @@ const MyProfileScreen = () => {
                 <Text style={styles.sectionTitle}>Job Info</Text>
                 <DetailRow label="Joined Date" value={empData.empJobDto?.joineddate} />
                 {/* <DetailRow label="Department ID" value={empData.empJobDto?.departmentid} /> */}
-                <DetailRow label="Department Name" value={empData.empJobDto?.departmentname} />
+                <DetailRow label="Department" value={empData.empJobDto?.departmentname} />
                 {/* <DetailRow label="Job Title ID" value={empData.empJobDto?.jobtitleid} /> */}
-                <DetailRow label="Job Title Name" value={empData.empJobDto?.jobtitlename} />
+                <DetailRow label="Designation" value={empData.empJobDto?.jobtitlename} />
                 <DetailRow label="Grade ID" value={empData.empJobDto?.gradeid} />
                 {/* <DetailRow label="Employment Status ID" value={empData.empJobDto?.employmentstatusid} /> */}
                 <DetailRow label="Daily Work Hours" value={empData.empJobDto?.dailyworkhours} />
@@ -299,10 +299,20 @@ const MyProfileScreen = () => {
                 )}
 
                 {/* Education */}
+
                 <Text style={styles.sectionTitle}>Education</Text>
                 {empData.empEducationDtos && empData.empEducationDtos.length > 0 ? (
                   empData.empEducationDtos.map((e, i) => (
-                    <DetailRow key={i} label={e.degree} value={e.institution} />
+                    <View key={i}>
+                      <DetailRow label="Degree Level" value={e.degreelevel} />
+                      <DetailRow label="Major Subject" value={e.majorsubject} />
+                      <DetailRow label="Institute" value={e.institutename} />
+                      <DetailRow label="Result" value={e.resultvalue} />
+                      <DetailRow label="Passing Year" value={e.passingyear} />
+                      {i < empData.empEducationDtos!.length - 1 && (
+                        <View style={{ borderBottomWidth: 2, borderBottomColor: '#de262915', marginVertical: 10 }} />
+                      )}
+                    </View>
                   ))
                 ) : (
                   <DetailRow label="Education" value="No Data" />
@@ -322,7 +332,15 @@ const MyProfileScreen = () => {
                 <Text style={styles.sectionTitle}>Dependents</Text>
                 {empData.empDependentDtos && empData.empDependentDtos.length > 0 ? (
                   empData.empDependentDtos.map((d, i) => (
-                    <DetailRow key={i} label={d.name} value={d.relation} />
+                    <View key={i}>
+                      <DetailRow label="Member Name" value={d.membername} />
+                      <DetailRow label="Relation" value={d.relation} />
+                      <DetailRow label="Date of Birth" value={d.memberdob} />
+                      <DetailRow label="Marital Status" value={d.maritalstatus} />
+                      {empData.empDependentDtos && i < empData.empDependentDtos.length - 1 && (
+                        <View style={{ borderBottomWidth: 2, borderBottomColor: '#de262915', marginVertical: 10 }} />
+                      )}
+                    </View>
                   ))
                 ) : (
                   <DetailRow label="Dependents" value="No Data" />

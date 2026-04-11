@@ -179,8 +179,14 @@ const DashboardScreen = () => {
           {/*<Card style={[styles.card, styles.cardBlue]} onPress={() => navigation.navigate('Employee')}>
     <Text style={styles.cardTitle}>Employees</Text>
   </Card>*/}
-          <Card style={[styles.card, styles.cardGreen]} onPress={() => navigation.navigate('Roster')}>
-            <Text style={styles.cardTitle}>My Roster</Text>
+
+          <Card style={[styles.card, styles.cardGreen]} onPress={() => navigation.navigate('WeeklyRoster')}>
+            <Text style={styles.cardTitle}>Weekly Roster</Text>
+          </Card>
+
+
+          <Card style={[styles.card, styles.cardGreen]} onPress={() => navigation.navigate('MonthlyRoster')}>
+            <Text style={styles.cardTitle}>Monthly Roster</Text>
           </Card>
           <Card style={[styles.card, styles.cardOrange]} onPress={() => navigation.navigate('Leave')}>
             <Text style={styles.cardTitle}>My Leave</Text>

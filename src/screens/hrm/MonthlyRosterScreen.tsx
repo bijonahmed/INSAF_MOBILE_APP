@@ -23,7 +23,7 @@ type RosterItem = {
   nightout: string;
 };
 
-const RosterScreen = () => {
+const MonthlyRosterScreen = () => {
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [loading, setLoading] = useState(false);
@@ -153,7 +153,7 @@ const RosterScreen = () => {
   );
 };
 
-export default RosterScreen;
+export default MonthlyRosterScreen;
 
 const styles = StyleSheet.create({
   container: {

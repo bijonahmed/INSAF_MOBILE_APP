@@ -3,7 +3,8 @@ export type RootStackParamList = {
   Login: undefined;
   Dashboard: undefined;
   Employee: undefined;
-  Roster: undefined;
+  MonthlyRoster: undefined;
+  WeeklyRoster: undefined;
   Leave: undefined;
   Reports: undefined;
   LockScreen: undefined;

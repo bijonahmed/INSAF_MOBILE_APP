@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
     GET_HR_LEAVE_TYPES: `${API_URL}/my/getLeaveType`,
     SAVE_LEAVE_APPLICATION: `${API_URL}/leave/saveLeaveApplication`,
     GetMonthlyRosterByEmpId: `${API_URL}/my/mygetMonthlyRoster`,
+    GetWeeklyRosterByEmpId: `${API_URL}/my/mygetWeeklyRoster`,
     UpdateSecUser: `${API_URL}/updateProfile`,
     ResetPassSecUser: `${API_URL}/users/updatePassword`,
   },
