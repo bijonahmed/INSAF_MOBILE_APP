@@ -16,6 +16,15 @@ export const API_ENDPOINTS = {
     GetWeeklyRosterByEmpId: `${API_URL}/my/mygetWeeklyRoster`,
     UpdateSecUser: `${API_URL}/updateProfile`,
     ResetPassSecUser: `${API_URL}/users/updatePassword`,
+    GET_EMP_UNDER_DPT: `${API_URL}/employee/getUnderDeptEmployee`,
+    GET_WEEKLY_ROSTER: `${API_URL}/roster/index`,
+    ADD_WEEKLY_ROSTER: `${API_URL}/roster/createWeeklyRoster`,
+    UPDATE_EMP_WEEKLY_ROSTER: `${API_URL}/roster/updateWeeklyRoster`,
+    GET_MONTHLY_ROSTER: `${API_URL}/roster/getMonthlyRoster`,
+    ADD_YEARLY_ROSTER: `${API_URL}/roster/createRosterYearly`,
+    UPDATE_MONTHLY_ROSTER: `${API_URL}/roster/UpdateMonthlyRosterById`,
+    GET_ATTENDANCE_DETAIL_REPORT: `${API_URL}/hrm_report/getAttendanceDetail`,
+
   },
   // Employment / Employee
   EMPLOYMENT: {

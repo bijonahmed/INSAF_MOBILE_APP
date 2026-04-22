@@ -15,6 +15,10 @@ import AddLeave from '../screens/hrm/leave/AddLeave';
 import LeaveScreen from '../screens/hrm/leave/LeaveScreen';
 import LeaveHistory from '../screens/hrm/leave/LeaveHistoryScreen';
 
+import EmpWeeklyRosterScreen from '../screens/hrm/empoyeeroster/EmpWeeklyRosterScreen';
+import EmpMonthlyRosterScreen from '../screens/hrm/empoyeeroster/EmpMonthlyRosterScreen';
+import EmployeeAttendanceScreen from '../screens/hrm/report/EmployeeAttendanceScreen';
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
@@ -34,13 +38,7 @@ export default function AppNavigator() {
     >
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
-
-      <Stack.Screen
-        name="Dashboard"
-        component={DashboardScreen}
-        options={{ headerBackVisible: false }}
-      />
-
+      <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ headerShown: true, headerBackVisible: false }} />
       {/* HRM Screens */}
       <Stack.Screen name="Employee" component={EmployeeScreen} />
       <Stack.Screen name="MonthlyRoster" component={MonthlyRosterScreen} options={{ title: "Monthly Roster" }} />
@@ -52,6 +50,11 @@ export default function AppNavigator() {
       <Stack.Screen name="Attendance" component={AttendanceScreen} />
       <Stack.Screen name="AddLeave" component={AddLeave} options={{ title: "Add Leave" }} />
       <Stack.Screen name="LeaveHistory" component={LeaveHistory} options={{ title: "Leave History" }} />
+      {/* For Incharge Screens */}
+      <Stack.Screen name="EmpWeeklyRosterScreen" component={EmpWeeklyRosterScreen} options={{ title: "Emp Weekly Roster" }} />
+      <Stack.Screen name="EmpMonthlyRosterScreen" component={EmpMonthlyRosterScreen} options={{ title: "Emp Monthly Roster" }} />
+      <Stack.Screen name="EmployeeAttendanceScreen" component={EmployeeAttendanceScreen} options={{ title: "Emp Atendance" }} />
+
     </Stack.Navigator>
   );
 }

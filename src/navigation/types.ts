@@ -14,4 +14,7 @@ export type RootStackParamList = {
   Attendance: undefined;
   AddLeave: undefined;
   LeaveHistory: undefined;
+  EmpWeeklyRosterScreen: undefined;
+  EmpMonthlyRosterScreen: undefined;
+  EmployeeAttendanceScreen:undefined;
 };
